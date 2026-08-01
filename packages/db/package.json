@@ -3,23 +3,33 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -R src/generated dist/generated",
     "db:generate": "prisma generate",
+    "db:generate:pgsql": "prisma generate --config prisma-pgsql.config.ts",
     "db:push": "prisma db push",
+    "db:push:pgsql": "prisma db push --config prisma-pgsql.config.ts",
     "db:studio": "prisma studio",
+    "db:studio:pgsql": "prisma studio --config prisma-pgsql.config.ts",
+    "sqlite": "node ../../scripts/db-ops.js sqlite",
+    "pgsql": "node ../../scripts/db-ops.js pgsql",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.0.0",
+    "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
+    "@prisma/client-runtime-utils": "7.9.1",
+    "bcryptjs": "^2.4.3",
     "better-sqlite3": "^13.0.0",
-    "dotenv": "^16"
+    "dotenv": "^16",
+    "pg": "^8"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7",
     "@types/node": "^20",
+    "@types/pg": "^8",
     "@workspace/config": "workspace:*",
     "eslint": "^9",
     "prisma": "^7.0.0",
@@ -30,6 +40,11 @@
       "types": "./src/client.ts",
       "default": "./dist/client.js"
     },
-    "./schema": "./prisma/schema.prisma"
+    "./client-pgsql": {
+      "types": "./src/client-pgsql.ts",
+      "default": "./dist/client-pgsql.js"
+    },
+    "./schema": "./prisma/schema.prisma",
+    "./schema-pgsql": "./prisma-pgsql/schema.prisma"
   }
 }

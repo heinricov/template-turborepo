@@ -3,6 +3,9 @@
   "ui": "tui",
   "globalEnv": [
     "DATABASE_URL",
+    "DATABASE_URL_PGSQL",
+    "POSTGRES_URL",
+    "PRISMA_DATABASE_URL",
     "JWT_SECRET",
     "NODE_ENV"
   ],

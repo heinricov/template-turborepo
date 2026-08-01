@@ -11,6 +11,8 @@
     "test": "turbo test",
     "test:ui": "turbo test --filter=@workspace/audit-vitest",
     "test:security": "turbo test --filter=@workspace/audit-security",
+    "sqlite": "pnpm --filter @workspace/db sqlite",
+    "pgsql": "pnpm --filter @workspace/db pgsql",
     "push": "bash scripts/github/push"
   },
   "devDependencies": {

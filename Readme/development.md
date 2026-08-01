@@ -125,6 +125,10 @@ Contoh menambah `apps/blog`:
 
 ## 💾 Alur Kerja Database
 
+Package `@workspace/db` punya **dua setup** — SQLite (lokal) dan PostgreSQL (produksi/deploy).
+
+### SQLite (default lokal)
+
 ```bash
 pnpm --filter @workspace/db db:generate   # regenerasi Prisma Client setelah ubah schema
 pnpm --filter @workspace/db db:push       # sinkronkan schema → SQLite (tanpa migrasi file)
@@ -134,6 +138,55 @@ pnpm --filter @workspace/db db:studio     # Prisma Studio (GUI browser)
 - Schema: `packages/db/prisma/schema.prisma` (satu model `User`, tabel `"Users"`).
 - `prisma.config.ts` membaca `DATABASE_URL` dari env.
 - File `dev.db` dibuat otomatis saat `db:push` pertama; jangan di-commit (`.gitignore`).
+
+### PostgreSQL (mis. database Prisma Postgres / Vercel)
+
+```bash
+# 1. Isi connection string Postgres Anda — salah satu nama berikut (prioritas):
+#    DATABASE_URL_PGSQL (kanonik) > POSTGRES_URL > PRISMA_DATABASE_URL (nama .env.local Vercel)
+#    Lokasi:
+#      - CLI Prisma: packages/db/.env
+#      - Runtime API lokal: apps/api/.env atau export di shell
+#      - Deploy Vercel: Environment Variables di dashboard project
+#    Contoh (di packages/db/.env):
+#      DATABASE_URL_PGSQL="postgres://user:pass@db.prisma.io:5432/postgres?sslmode=require"
+#    ⚠️ JANGAN timpa DATABASE_URL — itu khusus SQLite lokal.
+
+pnpm --filter @workspace/db db:generate:pgsql   # generate Prisma Client pgsql
+pnpm --filter @workspace/db db:push:pgsql       # sinkronkan schema → database Postgres
+pnpm --filter @workspace/db db:studio:pgsql     # Prisma Studio pgsql (opsional)
+```
+
+- Schema: `packages/db/prisma-pgsql/schema.prisma` (model `User` sama dengan sqlite).
+- Config: `prisma-pgsql.config.ts` (di-ignore git) membaca chain env di atas.
+- Hasil generate: `packages/db/src/generated/pgsql/` (di-ignore git, disalin ke `dist/` saat build).
+- **Auto-switch**: begitu salah satu env pgsql terisi, `apps/api` otomatis memakai PostgreSQL; tanpa env tersebut tetap SQLite. Periksa log API: `DB PostgreSQL Berhasil` / `DB Sqlite Berhasil`.
+- **Prisma Postgres**: `db.prisma.io` = koneksi _direct_ (pas untuk `db push`/Studio); untuk traffic aplikasi produksi gunakan string _pooled_ (`pooled.db.prisma.io`). `@prisma/adapter-pg` adalah adapter resmi untuk Prisma Postgres di Node.js.
+
+> Setelah mengubah model di `prisma-pgsql/schema.prisma`, jalankan `db:generate:pgsql` **dan** `db:push:pgsql`, lalu rebuild `@workspace/db` (`pnpm --filter @workspace/db build`) agar `dist/` ikut diperbarui.
+
+### Utilitas Data CLI — `pnpm sqlite` / `pnpm pgsql`
+
+Manipulasi data langsung dari terminal (script: `scripts/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+
+| Perintah                                                           | Fungsi                                                                     |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `pnpm sqlite tables` / `pnpm pgsql tables`                         | Daftar tabel                                                               |
+| `pnpm sqlite push table`                                           | Pilih tabel lalu isi data (interaktif)                                     |
+| `pnpm sqlite push table users`                                     | Isi data ke tabel `User` — prompt per kolom; kolom ber-`@default` otomatis |
+| `pnpm sqlite push table users email=a@b.co role=user`              | Non-interaktif via argumen `key=value` (bisa dicampur)                     |
+| `pnpm pgsql push table users email=a@b.co role=user`               | Sama, ke PostgreSQL                                                        |
+| `pnpm sqlite seed User` / `pnpm pgsql seed User`                   | Isi data seed tabel `User` (upsert by email — idempotent)                  |
+| `pnpm sqlite delete table users` / `pnpm pgsql delete table users` | Hapus **isi** tabel (semua baris), tabel tetap ada                         |
+| `pnpm sqlite delete` / `pnpm pgsql delete`                         | **Drop SEMUA tabel** + data — konfirmasi ketik `HAPUS SEMUA`               |
+
+Catatan:
+
+- Field `password` otomatis di-hash `bcrypt` (sesuai `apps/api`), jadi user hasil `push`/`seed` bisa langsung login.
+- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/db-ops.js`.
+- Setelah `delete` (drop semua), schema hilang — restore dengan `db:push` / `db:push:pgsql`.
+- Kedua schema (`prisma/schema.prisma` dan `prisma-pgsql/schema.prisma`) **harus tetap sinkron** — model & kolom diidentifikasi dari schema masing-masing database.
+- Prasyarat: `@workspace/db` sudah di-build (`pnpm --filter @workspace/db build`).
 
 ---
 

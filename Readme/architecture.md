@@ -163,8 +163,14 @@ Rincian isi tiap preset ada di **[`development.md`](development.md)**.
 
 ## 💾 Database
 
-- **Provider**: SQLite via driver adapter `@prisma/adapter-better-sqlite3` (tanpa server database).
-- **Schema**: `packages/db/prisma/schema.prisma` — satu model `User` (tabel `"Users"`).
+`@workspace/db` mendukung **dua setup database** sekaligus — SQLite untuk lokal, PostgreSQL untuk produksi/deploy (mis. Vercel).
+
+| Setup                  | Schema                       | Config                   | Client export                | Env var                                                       |
+| ---------------------- | ---------------------------- | ------------------------ | ---------------------------- | ------------------------------------------------------------- |
+| SQLite (default lokal) | `prisma/schema.prisma`       | `prisma.config.ts`       | `@workspace/db/client`       | `DATABASE_URL`                                                |
+| PostgreSQL             | `prisma-pgsql/schema.prisma` | `prisma-pgsql.config.ts` | `@workspace/db/client-pgsql` | `DATABASE_URL_PGSQL` / `POSTGRES_URL` / `PRISMA_DATABASE_URL` |
+
+- **Schema**: sama — satu model `User` (tabel `"Users"`), disalin ke kedua schema.
 
 ```prisma
 model User {
@@ -179,9 +185,12 @@ model User {
 }
 ```
 
-- **Client**: singleton global (`globalThis.prisma`) saat `NODE_ENV !== "production"` — `packages/db/src/client.ts`.
-- **Koneksi**: `process.env.DATABASE_URL ?? "file:<pkg>/dev.db"` — `packages/db/.env` berisi `DATABASE_URL="file:./dev.db"`.
-- **Siklus**: `db:generate` (build client) → `db:push` (sinkronisasi schema) → `db:studio` (browser UI).
+- **SQLite**: driver adapter `@prisma/adapter-better-sqlite3` (tanpa server database); koneksi `process.env.DATABASE_URL ?? "file:<pkg>/dev.db"`.
+- **PostgreSQL**: driver adapter `@prisma/adapter-pg`; klien dibuat **lazy** via `getPrismaPgsql()` — hanya dibuat saat salah satu env pgsql terisi (aman di lokal tanpa kredensial). Tiga nama env diterima otomatis (urutan prioritas): `DATABASE_URL_PGSQL` → `POSTGRES_URL` → `PRISMA_DATABASE_URL` — dua yang terakhir adalah nama default `.env.local` integrasi Vercel, jadi bisa disalin apa adanya. `DATABASE_URL` **sengaja tidak** dipakai untuk pgsql (milik SQLite lokal).
+- **Auto-switch di API**: `apps/api/src/prisma.service.ts` memakai `isPgConfigured()` — jika salah satu env pgsql ada → `getPrismaPgsql()`, selain itu `prisma` (SQLite); deploy otomatis Postgres, localhost tetap SQLite. Log inisialisasi menampilkan DB mana yang aktif.
+- **Siklus sqlite**: `db:generate` → `db:push` → `db:studio`.
+- **Siklus pgsql**: `db:generate:pgsql` → `db:push:pgsql` → `db:studio:pgsql` (semua dengan `--config prisma-pgsql.config.ts`).
+- **Lokasi env**: CLI Prisma membaca `packages/db/.env`; runtime API lokal membaca `apps/api/.env` (via `load-env.ts`) atau `export` di shell; deploy Vercel di-set di dashboard project.
 
 ---
 
@@ -218,7 +227,7 @@ apps/
 
 packages/
 ├── auth/src/        # jwt.module, jwt.service, jwt.guard, jwt.decorators, jwt.constants, jwt.types
-├── db/              # src/client.ts, src/index.ts, prisma/schema.prisma, prisma.config.ts
+├── db/              # src/client.ts + client-pgsql.ts, prisma/ (sqlite) + prisma-pgsql/, dua config
 ├── shadcn/src/
 │   ├── styles/      # globals.css (Tailwind v4 + tw-animate-css + shadcn)
 │   ├── ui/          # 30 komponen Base UI (button … theme-provider)

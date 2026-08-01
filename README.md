@@ -35,7 +35,7 @@ Template monorepo full-stack yang siap pakai: **Next.js**, **NestJS**, dan **Vit
 - **UI kit bersama** — `@workspace/shadcn`: 30+ komponen UI berbasis **Base UI** + **Tailwind CSS v4**, plus komponen kompleks siap pakai (form, tabel, sidebar, halaman login/signup).
 - **Autentikasi JWT terpusat** — `@workspace/auth`: modul NestJS reusable (`JwtModule`, `JwtGuard` global, dekorator `@Public` & `@CurrentUser`).
 - **Validasi Zod sekali, dipakai di mana-mana** — `@workspace/validation`: schema dibagi antara API (validasi request) dan frontend (validasi form).
-- **Database tanpa setup berat** — Prisma 7 + SQLite (`better-sqlite3`) dengan driver adapter, siap jalan tanpa server database.
+- **Database dual setup tanpa repot** — Prisma 7 + SQLite (`better-sqlite3`) siap jalan tanpa server database; otomatis beralih ke PostgreSQL saat env pgsql terisi (deploy Vercel).
 - **Kualitas teruji otomatis** — **129 test**: 92 test UI (jsdom + Testing Library) dan 37 test keamanan (unit JWT + integrasi langsung ke server dev).
 - **Konfigurasi bersama** — `@workspace/config` memusatkan 4 preset ESLint dan 5 tsconfig; konsisten di seluruh workspace.
 - **Caching build cerdas** — Turborepo men-cache hasil `build`, `lint`, dan `typecheck`.
@@ -98,21 +98,21 @@ Diagram dan alur data yang lebih dalam ada di **[`Readme/architecture.md`](Readm
 
 ## 🛠️ Tech Stack
 
-| Lapisan           | Teknologi                                    | Versi              |
-| ----------------- | -------------------------------------------- | ------------------ |
-| Manajemen package | pnpm                                         | 10.33.4            |
-| Monorepo build    | Turborepo                                    | 2.9.18             |
-| Runtime           | Node.js                                      | ≥ 20               |
-| App `web`         | Next.js (App Router) + React 19              | 16.2.6 / 19.2.4    |
-| App `admin`       | Vite + React 19 + React Router               | 6 / 7.18.2         |
-| App `api`         | NestJS                                       | 11.1.28            |
-| ORM / database    | Prisma + better-sqlite3 (driver adapter)     | 7.9.1 / 13         |
-| UI kit            | Base UI + Tailwind CSS v4 + shadcn           | 1.6.0 / 4 / 4.16   |
-| Tabel & kalender  | TanStack Table · react-day-picker · date-fns | 8.21.3 / 10 / 4.4  |
-| Validasi          | Zod                                          | 4.4.3              |
-| Autentikasi       | jsonwebtoken + bcryptjs                      | 9 / 2.4.3          |
-| Testing           | Vitest + jsdom + Testing Library             | 4.1.10 / 30 / 16.3 |
-| Kode gaya         | TypeScript 5 · ESLint 9 · Prettier           | —                  |
+| Lapisan           | Teknologi                                           | Versi              |
+| ----------------- | --------------------------------------------------- | ------------------ |
+| Manajemen package | pnpm                                                | 10.33.4            |
+| Monorepo build    | Turborepo                                           | 2.9.18             |
+| Runtime           | Node.js                                             | ≥ 20               |
+| App `web`         | Next.js (App Router) + React 19                     | 16.2.6 / 19.2.4    |
+| App `admin`       | Vite + React 19 + React Router                      | 6 / 7.18.2         |
+| App `api`         | NestJS                                              | 11.1.28            |
+| ORM / database    | Prisma + better-sqlite3 (lokal) / + pg (PostgreSQL) | 7.9.1 / 13 / 8     |
+| UI kit            | Base UI + Tailwind CSS v4 + shadcn                  | 1.6.0 / 4 / 4.16   |
+| Tabel & kalender  | TanStack Table · react-day-picker · date-fns        | 8.21.3 / 10 / 4.4  |
+| Validasi          | Zod                                                 | 4.4.3              |
+| Autentikasi       | jsonwebtoken + bcryptjs                             | 9 / 2.4.3          |
+| Testing           | Vitest + jsdom + Testing Library                    | 4.1.10 / 30 / 16.3 |
+| Kode gaya         | TypeScript 5 · ESLint 9 · Prettier                  | —                  |
 
 ---
 
@@ -126,7 +126,7 @@ Diagram dan alur data yang lebih dalam ada di **[`Readme/architecture.md`](Readm
 │   └── web/        # 🌐 Next.js 16 — website publik (port 3000)
 ├── packages/
 │   ├── auth/       # 🔐 @workspace/auth — modul JWT NestJS reusable
-│   ├── db/         # 🗄️ @workspace/db — Prisma client + schema (SQLite)
+│   ├── db/         # 🗄️ @workspace/db — Prisma client + schema (SQLite & PostgreSQL)
 │   ├── shadcn/     # 🎨 @workspace/shadcn — UI kit & komponen bersama
 │   └── validation/ # ✅ @workspace/validation — schema Zod bersama
 ├── audit/
@@ -134,7 +134,8 @@ Diagram dan alur data yang lebih dalam ada di **[`Readme/architecture.md`](Readm
 │   └── vitest/     # 🧪 @workspace/audit-vitest — 92 test UI (jsdom)
 ├── config/         # ⚙️ @workspace/config — preset ESLint & tsconfig
 ├── scripts/
-│   └── github/push # 🚀 git add + commit + push dalam satu perintah
+│   ├── db-ops.js      # 🗄️ CLI data: pnpm sqlite / pnpm pgsql (push, delete, seed, tables)
+│   └── github/push    # 🚀 git add + commit + push dalam satu perintah
 ├── turbo.json      # 🌀 Konfigurasi pipeline Turborepo
 └── pnpm-workspace.yaml
 ```
@@ -171,7 +172,7 @@ Referensi API lengkap (request/response, contoh `curl`, validasi) di **[`Readme/
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`@workspace/shadcn`**     | UI kit berbasis Base UI + Tailwind v4. **30 komponen UI** (button, dialog, select, sidebar, dsb.), komponen kompleks (`Login`, `Signup`, `DataForm`, `DataTable`), komponen sidebar (`LayoutSide`, `NavMain`, `NavUser`, …), hooks (`use-mobile`), dan lib (`cn`, `apiFetch`). |
 | **`@workspace/auth`**       | Modul JWT untuk NestJS: `JwtModule.register()` / `registerAsync()`, `JwtService` (sign/verify), `JwtGuard` global, dekorator `@Public()` & `@CurrentUser()`.                                                                                                                   |
-| **`@workspace/db`**         | Prisma 7 client dengan driver adapter `better-sqlite3`, singleton global, model `User` (email unik, password ter-hash, role, status).                                                                                                                                          |
+| **`@workspace/db`**         | **Dua setup database**: Prisma SQLite (default, `DATABASE_URL`) dan Prisma PostgreSQL (`DATABASE_URL_PGSQL`); model `User` (email unik, password ter-hash, role, status). API otomatis memakai PostgreSQL saat env pgsql terisi (deploy Vercel) dan SQLite di localhost.       |
 | **`@workspace/validation`** | Schema Zod 4 dibagikan API ↔ frontend: `registerSchema`, `loginSchema`, `updateProfileSchema`, `roleSchema` + tipe hasil infer.                                                                                                                                                |
 | **`@workspace/config`**     | 4 preset ESLint (`base`, `nest`, `next-js`, `react-internal`) + 5 tsconfig (`base`, `nest`, `nextjs`, `react-library`, `vite-react`).                                                                                                                                          |
 
@@ -218,6 +219,10 @@ cp apps/api/.env.example apps/api/.env   # isi JWT_SECRET dengan secret acak
 ```
 
 > `DATABASE_URL` bersifat opsional — tanpa di-set, database otomatis memakai `file:./dev.db` di `packages/db`.
+>
+> Untuk **PostgreSQL (mis. database Prisma Postgres di Vercel)**: set `DATABASE_URL_PGSQL` (atau `POSTGRES_URL` / `PRISMA_DATABASE_URL` — nama yang dikenali otomatis) dengan connection string Anda, lalu jalankan `pnpm --filter @workspace/db db:generate:pgsql && pnpm --filter @workspace/db db:push:pgsql`. API otomatis beralih ke Postgres saat salah satu env ini terisi (lokal tetap SQLite). Jangan menimpa `DATABASE_URL` — itu khusus SQLite lokal.
+>
+> **Utilitas data CLI** (script: `scripts/db-ops.js`): `pnpm sqlite seed User` (isi data seed admin/user), `pnpm sqlite push table users` / `pnpm pgsql push table users email=a@b.co role=user` (isikan data), `pnpm sqlite delete table users` (kosongkan isi tabel), `pnpm sqlite delete` (drop semua tabel). Detail: [development.md](Readme/development.md#-utilitas-data-cli--pnpm-sqlite--pnpm-pgsql).
 
 ### 3. Siapkan database
 
@@ -278,12 +283,13 @@ Perilakunya:
 
 ## 🔐 Environment Variables
 
-| Variable       | Lokasi             | Default                 | Deskripsi                                                   |
-| -------------- | ------------------ | ----------------------- | ----------------------------------------------------------- |
-| `JWT_SECRET`   | `apps/api/.env`    | — (wajib diisi)         | Secret untuk menandatangani & memverifikasi token JWT       |
-| `DATABASE_URL` | `packages/db/.env` | `file:./dev.db`         | Koneksi SQLite untuk Prisma                                 |
-| `API_URL`      | env `apps/web`     | `http://localhost:4000` | Base URL API — dipakai rewrite `/api/*` & fetch server-side |
-| `NODE_ENV`     | global             | `development`           | Mode lingkungan (dideklarasikan di `turbo.json` globalEnv)  |
+| Variable             | Lokasi                   | Default                 | Deskripsi                                                                                                                                               |
+| -------------------- | ------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`         | `apps/api/.env`          | — (wajib diisi)         | Secret untuk menandatangani & memverifikasi token JWT                                                                                                   |
+| `DATABASE_URL`       | `packages/db/.env`       | `file:./dev.db`         | Koneksi SQLite untuk Prisma (mode lokal)                                                                                                                |
+| `DATABASE_URL_PGSQL` | env deploy (mis. Vercel) | —                       | Koneksi PostgreSQL — alternatif: `POSTGRES_URL` / `PRISMA_DATABASE_URL` (nama .env.local Vercel). Saat salah satu terisi, API otomatis memakai Postgres |
+| `API_URL`            | env `apps/web`           | `http://localhost:4000` | Base URL API — dipakai rewrite `/api/*` & fetch server-side                                                                                             |
+| `NODE_ENV`           | global                   | `development`           | Mode lingkungan (dideklarasikan di `turbo.json` globalEnv)                                                                                              |
 
 > Semua variabel di atas dideklarasikan sebagai `globalEnv` di `turbo.json` agar pipeline Turbo selalu menyadari perubahannya.
 
