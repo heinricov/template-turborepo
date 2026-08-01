@@ -22,12 +22,29 @@ Template monorepo full-stack siap pakai: **Next.js 16**, **NestJS 11**, dan **Vi
 
 ```bash
 git clone https://github.com/heinricov/template-turborepo.git
-cd template-turborepo-01
+```
 
-corepack enable     # pnpm 10.33.4 (jika pnpm belum terpasang)
-pnpm bootstrap      # siapkan .env (JWT_SECRET acak, DATABASE_URL_PGSQL kosong),
-                    # install deps, generate & buat tabel database — aman diulang
-pnpm dev            # jalankan semua aplikasi
+```bash
+cd template-turborepo-01
+```
+
+pnpm 10.33.4 (jika pnpm belum terpasang)
+
+```bash
+corepack enable
+```
+
+siapkan .env (JWT_SECRET acak, DATABASE_URL_PGSQL kosong),
+install deps, generate & buat tabel database — aman diulang
+
+```bash
+pnpm bootstrap
+```
+
+jalankan semua aplikasi
+
+```bash
+pnpm dev
 ```
 
 | App   | URL                                     |
