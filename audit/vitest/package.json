@@ -1,0 +1,29 @@
+{
+  "name": "@workspace/audit-vitest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@workspace/config": "workspace:*",
+    "@workspace/shadcn": "workspace:*",
+    "eslint": "^9",
+    "jsdom": "^30.0.1",
+    "react": "^19",
+    "react-dom": "^19",
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

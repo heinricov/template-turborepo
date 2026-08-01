@@ -1,0 +1,9 @@
+{
+  "extends": "@workspace/config/typescript/base.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src", "vitest.config.ts"]
+}

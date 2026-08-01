@@ -1,0 +1,32 @@
+{
+  "name": "@workspace/config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./eslint/base": "./eslint/base.js",
+    "./eslint/nest": "./eslint/nest.js",
+    "./eslint/next-js": "./eslint/next.js",
+    "./eslint/react-internal": "./eslint/react-internal.js",
+    "./typescript/base.json": "./typescript/base.json",
+    "./typescript/nest.json": "./typescript/nest.json",
+    "./typescript/nextjs.json": "./typescript/nextjs.json",
+    "./typescript/react-library.json": "./typescript/react-library.json",
+    "./typescript/vite-react.json": "./typescript/vite-react.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@next/eslint-plugin-next": "^16.2.6",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "eslint": "^9",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-only-warn": "^1.2.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-turbo": "^2.9.15",
+    "globals": "^17.6.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8.60.0"
+  }
+}

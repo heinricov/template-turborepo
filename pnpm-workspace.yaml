@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "config"
+  - "audit/*"
 
 allowBuilds:
   sharp: true
