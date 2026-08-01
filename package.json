@@ -10,7 +10,8 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "test:ui": "turbo test --filter=@workspace/audit-vitest",
-    "test:security": "turbo test --filter=@workspace/audit-security"
+    "test:security": "turbo test --filter=@workspace/audit-security",
+    "push": "bash scripts/github/push"
   },
   "devDependencies": {
     "@workspace/config": "workspace:*",

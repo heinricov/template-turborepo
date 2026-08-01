@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+
+read -rp "Commit message (Enter untuk default): " MESSAGE || true
+
+if [[ -z "$MESSAGE" ]]; then
+  MESSAGE="commit-$(date '+%Y-%m-%d %H:%M:%S')"
+fi
+
+git add .
+git commit -m "$MESSAGE" || echo "Tidak ada perubahan untuk di-commit — lanjut push."
+git push
