@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Setup awal proyek setelah clone — idempotent (tidak menimpa file yang sudah ada).
+# Penggunaan: pnpm bootstrap
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+ROOT="$PWD"
+
+gen_secret() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex 32
+  else
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  fi
+}
+
+echo "==> Setup Template Turborepo"
+echo
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "✗ Node.js tidak ditemukan. Install Node.js ≥ 20 dulu (mis. https://nodejs.org)."
+  exit 1
+fi
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "! pnpm belum tersedia — aktifkan lewat Corepack:"
+  echo "    corepack enable"
+  echo "  lalu jalankan ulang: pnpm setup"
+  echo
+  echo "  (atau: npm i -g pnpm@10)"
+  exit 1
+fi
+
+echo "  ✓ Node $(node -v) / pnpm $(pnpm -v)"
+
+echo
+echo "==> 1/4 Environment files"
+
+if [[ -f "$ROOT/apps/api/.env" ]]; then
+  echo "  ✓ apps/api/.env sudah ada (dibiarkan apa adanya)"
+else
+  cp "$ROOT/apps/api/.env.example" "$ROOT/apps/api/.env"
+  SECRET="$(gen_secret)"
+  if grep -q '^JWT_SECRET=' "$ROOT/apps/api/.env"; then
+    sed -i.bak "s/^JWT_SECRET=.*/JWT_SECRET=${SECRET}/" "$ROOT/apps/api/.env"
+    rm -f "$ROOT/apps/api/.env.bak"
+  else
+    printf '\nJWT_SECRET=%s\n' "$SECRET" >>"$ROOT/apps/api/.env"
+  fi
+  echo "  ✓ apps/api/.env dibuat dari example — JWT_SECRET di-generate acak"
+fi
+
+if [[ -f "$ROOT/packages/db/.env" ]]; then
+  echo "  ✓ packages/db/.env sudah ada (dibiarkan apa adanya)"
+else
+  cp "$ROOT/packages/db/.env.example" "$ROOT/packages/db/.env"
+  echo "  ✓ packages/db/.env dibuat dari example — DATABASE_URL_PGSQL kosong (SQLite)"
+  echo "    (opsional PostgreSQL: isi DATABASE_URL_PGSQL — lihat Readme/use.md)"
+fi
+
+echo
+echo "==> 2/4 Install dependencies"
+pnpm install
+
+echo
+echo "==> 3/4 Generate Prisma Client"
+pnpm --filter @workspace/db db:generate
+
+echo
+echo "==> 4/4 Setup database (SQLite)"
+pnpm --filter @workspace/db db:push
+
+echo
+echo "==> Setup selesai! 🎉"
+echo
+echo "Jalankan aplikasi:"
+echo "    pnpm dev"
+echo "      web   → http://localhost:3000"
+echo "      admin → http://localhost:3001"
+echo "      api   → http://localhost:4000"
+echo
+echo "Opsional:"
+echo "    pnpm sqlite seed User   → isi akun contoh (admin / user)"
+echo "    pnpm test               → jalankan semua test"
+echo "    PostgreSQL (Vercel/Prisma Postgres) → panduan di Readme/use.md"
