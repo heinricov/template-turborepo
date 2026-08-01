@@ -9,15 +9,15 @@ import { AUTH_EVENT, clearStoredAuth, getStoredAuth } from "@/lib/auth"
 
 const menuItems = [
   { name: "Home", href: "/" },
-  { name: "Profile", href: "/profile" },
+  { name: "Data", href: "/data" },
 ]
 
 export const NavHeader = () => {
   const router = useRouter()
   const [menuState, setMenuState] = React.useState(false)
-  const [auth, setAuth] = React.useState<ReturnType<typeof getStoredAuth> | undefined>(
-    undefined
-  )
+  const [auth, setAuth] = React.useState<
+    ReturnType<typeof getStoredAuth> | undefined
+  >(undefined)
 
   React.useEffect(() => {
     setAuth(getStoredAuth())
@@ -54,13 +54,15 @@ export const NavHeader = () => {
     router.push("/")
   }
 
-  const visibleMenuItems = auth ? menuItems : menuItems.filter((i) => i.href !== "/profile")
+  const visibleMenuItems = auth
+    ? menuItems
+    : menuItems.filter((i) => i.href !== "/profile")
 
   return (
     <header>
       <nav
         data-state={menuState && "active"}
-        className="fixed top-0 z-20 w-full bg-background data-[state=active]:bottom-0"
+        className="bg-background fixed top-0 z-20 w-full border-b data-[state=active]:bottom-0"
       >
         <div className="mx-auto max-w-6xl px-6">
           <div className="relative flex flex-wrap items-center justify-between py-5 max-lg:gap-6">
@@ -73,21 +75,34 @@ export const NavHeader = () => {
                 <span className="text-2xl font-bold">Turborepo</span>
               </Link>
 
-              <button
-                onClick={() => setMenuState(!menuState)}
-                aria-label={menuState == true ? "Close Menu" : "Open Menu"}
-                className="relative z-20 block cursor-pointer after:absolute after:-inset-4 lg:hidden"
-              >
-                <div
-                  aria-hidden
-                  className="m-auto flex size-4.5 flex-col items-center justify-center gap-1.75 duration-200 in-data-[state=active]:scale-0 in-data-[state=active]:rotate-180 in-data-[state=active]:opacity-0"
+              <div className="flex gap-2">
+                {auth === undefined ? null : auth ? (
+                  <div className="md:hidden">
+                    <NavUser
+                      user={{
+                        name: auth.user.username ?? auth.user.email,
+                        email: auth.user.email,
+                      }}
+                      onLogout={handleLogout}
+                    />
+                  </div>
+                ) : null}
+                <button
+                  onClick={() => setMenuState(!menuState)}
+                  aria-label={menuState == true ? "Close Menu" : "Open Menu"}
+                  className="relative z-20 block cursor-pointer after:absolute after:-inset-4 lg:hidden"
                 >
-                  <span className="h-0.5 w-full rounded-full bg-foreground" />
-                  <span className="h-0.5 w-full rounded-full bg-foreground" />
-                </div>
+                  <div
+                    aria-hidden
+                    className="m-auto flex size-4.5 flex-col items-center justify-center gap-1.75 duration-200 in-data-[state=active]:scale-0 in-data-[state=active]:rotate-180 in-data-[state=active]:opacity-0"
+                  >
+                    <span className="bg-foreground h-0.5 w-full rounded-full" />
+                    <span className="bg-foreground h-0.5 w-full rounded-full" />
+                  </div>
 
-                <X className="absolute inset-0 m-auto size-6 -translate-x-0.75 scale-0 -rotate-180 opacity-0 duration-200 in-data-[state=active]:scale-100 in-data-[state=active]:rotate-0 in-data-[state=active]:opacity-100" />
-              </button>
+                  <X className="absolute inset-0 m-auto size-6 -translate-x-0.75 scale-0 -rotate-180 opacity-0 duration-200 in-data-[state=active]:scale-100 in-data-[state=active]:rotate-0 in-data-[state=active]:opacity-100" />
+                </button>
+              </div>
 
               <div className="max-lg:hidden">
                 <ul className="flex gap-8 text-sm">
@@ -95,7 +110,7 @@ export const NavHeader = () => {
                     <li key={index}>
                       <Link
                         href={item.href}
-                        className="block text-muted-foreground duration-150 hover:text-accent-foreground"
+                        className="text-muted-foreground hover:text-accent-foreground block duration-150"
                       >
                         <span>{item.name}</span>
                       </Link>
@@ -105,14 +120,14 @@ export const NavHeader = () => {
               </div>
             </div>
 
-            <div className="mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 bg-background in-data-[state=active]:block md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none lg:in-data-[state=active]:flex dark:shadow-none dark:lg:bg-transparent">
+            <div className="bg-background mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 in-data-[state=active]:block md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none lg:in-data-[state=active]:flex dark:shadow-none dark:lg:bg-transparent">
               <div className="lg:hidden">
                 <ul>
                   {visibleMenuItems.map((item, index) => (
                     <li key={index}>
                       <Link
                         href={item.href}
-                        className="block py-3 text-2xl font-medium text-foreground"
+                        className="text-foreground block py-3 text-2xl font-medium"
                       >
                         <span>{item.name}</span>
                       </Link>
