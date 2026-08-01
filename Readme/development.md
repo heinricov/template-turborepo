@@ -49,6 +49,18 @@ pnpm dev                                  # web:3000 · admin:3001 · api:4000
 
 Contoh pola umum untuk package lain (`pnpm --filter <nama> <script>`), atau sekaligus dari root dengan Turbo: `pnpm lint` / `pnpm typecheck` / `pnpm build`.
 
+### Git Workflow — `pnpm push`
+
+Script `scripts/github/push` menggabungkan `git add .` → `git commit` → `git push` dalam satu perintah:
+
+```bash
+pnpm push        # atau: ./scripts/github/push
+```
+
+- Bertanya `Commit message (Enter untuk default):` — jika kosong, dipakai `commit-<datetime saat push>` (mis. `commit-2026-08-01 15:11:27`).
+- Tanpa perubahan: pesan informasi dicetak, push tetap dijalankan.
+- Error pada `git add`/`git push` menghentikan script (via `set -euo pipefail`).
+
 ---
 
 ## 🧱 Menambah App Baru

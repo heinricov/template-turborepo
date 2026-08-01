@@ -133,6 +133,8 @@ Diagram dan alur data yang lebih dalam ada di **[`Readme/architecture.md`](Readm
 │   ├── security/   # 🛡️ @workspace/audit-security — 37 test JWT + integrasi
 │   └── vitest/     # 🧪 @workspace/audit-vitest — 92 test UI (jsdom)
 ├── config/         # ⚙️ @workspace/config — preset ESLint & tsconfig
+├── scripts/
+│   └── github/push # 🚀 git add + commit + push dalam satu perintah
 ├── turbo.json      # 🌀 Konfigurasi pipeline Turborepo
 └── pnpm-workspace.yaml
 ```
@@ -252,8 +254,25 @@ Tunggu beberapa detik, lalu buka:
 | `pnpm test`          | Semua test (UI + security)                                               |
 | `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                          |
 | `pnpm test:security` | Hanya `@workspace/audit-security`                                        |
+| `pnpm push`          | `git add .` → `git commit` → `git push` dalam satu perintah              |
 
 Script spesifik per app (`next dev`, `nest start`, `vite`, `prisma db push`, dst.) ada di **[`Readme/development.md`](Readme/development.md)**.
+
+### 🚀 Git Workflow — `pnpm push`
+
+Alias untuk `scripts/github/push` — satu perintah untuk `git add .`, commit, dan push:
+
+```bash
+pnpm push
+```
+
+Perilakunya:
+
+1. Bertanya **satu hal** saja: `Commit message (Enter untuk default):`.
+2. Jika pesan **kosong**, dipakai default `commit-<datetime saat push>` (contoh: `commit-2026-08-01 15:11:27`).
+3. Lalu `git add .` → `git commit -m "<pesan>"` → `git push` secara berurutan.
+4. Jika tidak ada perubahan untuk di-commit, pesan informasi dicetak dan **push tetap dijalankan**.
+5. Jika `git add`/`git push` gagal, script berhenti dengan error (tidak dipaksakan lanjut).
 
 ---
 
