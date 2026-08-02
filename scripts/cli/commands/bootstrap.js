@@ -1,4 +1,4 @@
-// Peruntukan: perintah `morea bootstrap` — setup awal project (idempotent).
+// Peruntukan: perintah `cli bootstrap` — setup awal project (idempotent).
 export function register(program) {
   const run =
     (fn) =>
@@ -18,8 +18,8 @@ export function register(program) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea bootstrap                 → setup lengkap
-  (corepack enable lalu pnpm morea bootstrap bila pnpm belum ada)`
+  pnpm bootstrap                 → setup lengkap
+  (corepack enable lalu pnpm bootstrap bila pnpm belum ada)`
     )
     .action(
       run(async () => {

@@ -17,7 +17,7 @@ const TEMPLATE_README = path.join(
 const COMMIT_MD = path.join(ROOT, "commit.md")
 const COMMIT_MD_HEAD = `# 📝 Catatan Commit
 
-Tabel ini diisi otomatis oleh \`pnpm morea push\` — satu baris per commit.
+Tabel ini diisi otomatis oleh \`pnpm push\` — satu baris per commit.
 
 | datetime | commit | type | file list |
 | -------- | ------ | ---- | --------- |
@@ -94,7 +94,7 @@ async function runAll(steps, logDir) {
 
 export async function runBootstrap() {
   const started = Date.now()
-  const logDir = fs.mkdtempSync(path.join(os.tmpdir(), "morea-bootstrap-"))
+  const logDir = fs.mkdtempSync(path.join(os.tmpdir(), "cli-bootstrap-"))
   let failed = false
 
   console.log(
@@ -117,7 +117,7 @@ export async function runBootstrap() {
     errorBox("✗ pnpm tidak ditemukan", [
       [
         chalk.red(
-          "Aktifkan lewat Corepack: corepack enable lalu pnpm morea bootstrap"
+          "Aktifkan lewat Corepack: corepack enable lalu pnpm bootstrap"
         ),
         chalk.red,
       ],
@@ -232,10 +232,10 @@ export async function runBootstrap() {
     console.log(`    • api    → ${chalk.cyan("http://localhost:4000")}`)
     console.log(`\n  ${chalk.bold("Opsional:")}`)
     console.log(
-      `    • ${chalk.cyan("pnpm morea db sqlite seed User")}  → isi akun contoh (admin / user)`
+      `    • ${chalk.cyan("pnpm sqlite seed User")}  → isi akun contoh (admin / user)`
     )
     console.log(
-      `    • ${chalk.cyan("pnpm morea test")}              → jalankan semua test`
+      `    • ${chalk.cyan("pnpm test")}              → jalankan semua test`
     )
     console.log(
       `    • PostgreSQL             → isi DATABASE_URL_PGSQL (panduan di GitHub repo)`

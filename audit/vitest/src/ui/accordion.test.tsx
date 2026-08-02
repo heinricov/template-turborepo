@@ -1,4 +1,4 @@
-// File uji otomatis dari `pnpm morea unitest create` — sesuaikan sesuai kebutuhan.
+// File uji otomatis dari `pnpm unitest create` — sesuaikan sesuai kebutuhan.
 
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"

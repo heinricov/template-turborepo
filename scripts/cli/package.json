@@ -1,12 +1,9 @@
 {
-  "name": "morea-cli",
+  "name": "workspace-cli",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "CLI lokal untuk project Turborepo ini (hanya lokal, tidak dipublish)",
-  "bin": {
-    "morea": "./index.js"
-  },
   "scripts": {
     "format": "prettier --write \"**/*.js\""
   },

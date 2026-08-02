@@ -7,7 +7,7 @@ import { ROOT, gitBin, nowStamp, clackText, clackSelect } from "./ui.js"
 const COMMIT_MD = path.join(ROOT, "commit.md")
 const COMMIT_MD_HEAD = `# 📝 Catatan Commit
 
-Tabel ini diisi otomatis oleh \`pnpm morea push\` — satu baris per commit.
+Tabel ini diisi otomatis oleh \`pnpm push\` — satu baris per commit.
 
 | datetime | commit | type | file list |
 | -------- | ------ | ---- | --------- |

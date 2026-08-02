@@ -1,4 +1,4 @@
-// Peruntukan: perintah `morea test` — jalankan unitest/security/all dengan pilihan folder & file.
+// Peruntukan: perintah `cli test` — jalankan unitest/security/all dengan pilihan folder & file.
 export function register(program) {
   const run =
     (fn) =>
@@ -25,10 +25,10 @@ export function register(program) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea test                    → menu interaktif
-  pnpm morea test unitest ui         → semua test di folder ui
-  pnpm morea test unitest ui/button.test.tsx → satu file
-  pnpm morea test security unit      → folder unit (security)`
+  pnpm test                    → menu interaktif
+  pnpm test unitest ui         → semua test di folder ui
+  pnpm test unitest ui/button.test.tsx → satu file
+  pnpm test security unit      → folder unit (security)`
     )
     .action(
       run(async (jenis, folder, file) => {

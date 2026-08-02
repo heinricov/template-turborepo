@@ -1,4 +1,4 @@
-// Peruntukan: perintah `morea db <sqlite|pgsql> ...` — utilitas data (push/delete/seed/tables).
+// Peruntukan: perintah `cli db <sqlite|pgsql> ...` — utilitas data (push/delete/seed/tables).
 function registerDbGroup(group) {
   const run =
     (fn) =>
@@ -33,8 +33,8 @@ function registerDbGroup(group) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea db sqlite push table users email=a@b.co role=user
-  pnpm morea db sqlite push users email=a@b.co`
+  pnpm sqlite push table users email=a@b.co role=user
+  pnpm sqlite push users email=a@b.co`
     )
     .action(
       run(async (args) => {
@@ -51,8 +51,8 @@ function registerDbGroup(group) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea db sqlite delete table users   → hapus semua baris tabel users
-  pnpm morea db sqlite delete               → hapus SEMUA tabel (konfirmasi HAPUS SEMUA)`
+  pnpm sqlite delete table users   → hapus semua baris tabel users
+  pnpm sqlite delete               → hapus SEMUA tabel (konfirmasi HAPUS SEMUA)`
     )
     .action(
       run(async (args) => {

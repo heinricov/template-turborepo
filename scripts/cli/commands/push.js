@@ -1,4 +1,4 @@
-// Peruntukan: perintah `morea push` — git add → commit → push + catat ke commit.md.
+// Peruntukan: perintah `cli push` — git add → commit → push + catat ke commit.md.
 export function register(program) {
   const run =
     (fn) =>
@@ -27,8 +27,8 @@ export function register(program) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea push                      → prompt interaktif
-  pnpm morea push -m "fix: typo" -t fix → langsung commit & push`
+  pnpm push                      → prompt interaktif
+  pnpm push -m "fix: typo" -t fix → langsung commit & push`
     )
     .action(
       run(async (opts) => {

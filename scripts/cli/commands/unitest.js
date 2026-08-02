@@ -1,4 +1,4 @@
-// Peruntukan: perintah `morea unitest create` — generator skeleton unit test untuk @workspace/shadcn.
+// Peruntukan: perintah `cli unitest create` — generator skeleton unit test untuk @workspace/shadcn.
 export function register(program) {
   const run =
     (fn) =>
@@ -28,9 +28,9 @@ export function register(program) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea unitest create              → menu pilih folder & file
-  pnpm morea unitest create ui           → pilih file di folder ui
-  pnpm morea unitest create ui accordion.tsx → buat test langsung`
+  pnpm unitest create              → menu pilih folder & file
+  pnpm unitest create ui           → pilih file di folder ui
+  pnpm unitest create ui accordion.tsx → buat test langsung`
     )
     .action(
       run(async (folder, file) => {

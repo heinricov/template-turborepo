@@ -21,7 +21,7 @@ export const gitBin = () => (process.platform === "win32" ? "git.exe" : "git")
 
 export function banner() {
   const text = [
-    `${chalk.bold("⚡ morea — CLI lokal Template Turborepo")}`,
+    `${chalk.bold("⚡ cli — CLI lokal Template Turborepo")}`,
     `${chalk.dim(`v${CLI_VERSION} · khusus project ini (tidak dipublish)`)}`,
   ].join("\n")
   console.log(
@@ -29,7 +29,7 @@ export function banner() {
       padding: { top: 1, bottom: 1, left: 2, right: 2 },
       borderStyle: "round",
       borderColor: "cyan",
-      title: "MOREA",
+      title: "CLI",
       titleAlignment: "left",
     })
   )

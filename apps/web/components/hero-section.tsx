@@ -55,15 +55,16 @@ const commands = [
   { command: "pnpm typecheck", description: "tsc --noEmit semua workspace" },
   { command: "pnpm format", description: "Prettier — tulis ulang semua file" },
   {
-    command: "pnpm morea",
-    description: "CLI lokal (Commander) — banner + daftar semua perintah",
+    command: "pnpm cli",
+    description:
+      "CLI lokal (Commander) — banner + daftar perintah (pnpm cli list)",
   },
   {
-    command: "pnpm morea test",
+    command: "pnpm test",
     description: "Menu: unitest / security / all — pilih folder & file",
   },
   {
-    command: "pnpm morea test unitest ui",
+    command: "pnpm test unitest ui",
     description: "Langsung: semua test di folder ui (tanpa menu)",
   },
   {
@@ -75,28 +76,28 @@ const commands = [
     description: "Hanya test @workspace/audit-security",
   },
   {
-    command: "pnpm morea unitest create ui accordion.tsx",
+    command: "pnpm unitest create ui accordion.tsx",
     description:
       "Generator skeleton unit test @workspace/shadcn (menu: tanpa argumen)",
   },
   {
-    command: "pnpm morea db sqlite seed User",
+    command: "pnpm sqlite seed User",
     description: "Isi akun contoh admin & user (password di-hash bcrypt)",
   },
   {
-    command: "pnpm morea db sqlite tables",
+    command: "pnpm sqlite tables",
     description: "Daftar tabel di SQLite",
   },
   {
-    command: "pnpm morea db sqlite push table users",
+    command: "pnpm sqlite push table users",
     description: "Input data ke tabel User (interaktif atau key=value)",
   },
   {
-    command: "pnpm morea db pgsql push table users",
+    command: "pnpm pgsql push table users",
     description: "Input data ke PostgreSQL (perlu DATABASE_URL_PGSQL)",
   },
   {
-    command: "pnpm morea push",
+    command: "pnpm push",
     description: "git add → commit → push dalam satu perintah",
   },
 ]

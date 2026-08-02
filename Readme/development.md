@@ -49,13 +49,13 @@ pnpm dev                                  # web:3000 · admin:3001 · api:4000
 
 Contoh pola umum untuk package lain (`pnpm --filter <nama> <script>`), atau sekaligus dari root dengan Turbo: `pnpm lint` / `pnpm typecheck` / `pnpm build`.
 
-### Git Workflow — `pnpm morea push`
+### Git Workflow — `pnpm push`
 
-Perintah `push` pada CLI lokal `morea` (`scripts/cli/`) menggabungkan `git add .` → `git commit` → `git push` dalam satu perintah:
+Perintah `push` pada CLI lokal `cli` (`scripts/cli/`; alias `pnpm push`) menggabungkan `git add .` → `git commit` → `git push` dalam satu perintah:
 
 ```bash
 pnpm push                        # interaktif
-pnpm morea push -m "pesan" -t fix  # langsung tanpa prompt
+pnpm push -m "pesan" -t fix  # langsung tanpa prompt
 ```
 
 - Bertanya `Commit message (Enter untuk default):` — jika kosong, dipakai `commit-<datetime saat push>` (mis. `commit-2026-08-01 15:11:27`).
@@ -169,7 +169,7 @@ pnpm --filter @workspace/db db:studio:pgsql     # Prisma Studio pgsql (opsional)
 
 ### Utilitas Data CLI — `pnpm sqlite` / `pnpm pgsql`
 
-Manipulasi data langsung dari terminal (perintah `db` pada CLI `morea` — implementasi di `scripts/cli/lib/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+Manipulasi data langsung dari terminal (perintah `db` pada CLI `cli` — implementasi di `scripts/cli/lib/db-ops.js`; alias `pnpm sqlite`/`pnpm pgsql`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
 
 | Perintah                                                           | Fungsi                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |

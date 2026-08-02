@@ -1,4 +1,4 @@
-// Peruntukan: perintah `morea rename` — ganti nama project setelah clone (idempotent).
+// Peruntukan: perintah `cli rename` — ganti nama project setelah clone (idempotent).
 export function register(program) {
   const run =
     (fn) =>
@@ -18,7 +18,7 @@ export function register(program) {
     .addHelpText(
       "after",
       `\nContoh:
-  pnpm morea rename my-project
+  pnpm rename my-project
 Catatan: URL GitHub di hero-section.tsx dan README tidak disentuh (menunjuk repo template).`
     )
     .action(

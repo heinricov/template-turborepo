@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// morea — CLI lokal untuk project Turborepo ini.
+// cli — CLI lokal untuk project Turborepo ini.
 // Setup tunggal: definisi perintah di `commands/`, implementasi di `lib/`.
 import { Command } from "commander"
 import { banner, CLI_VERSION } from "./lib/ui.js"
@@ -9,9 +9,10 @@ import { register as registerPush } from "./commands/push.js"
 import { register as registerBootstrap } from "./commands/bootstrap.js"
 import { register as registerRename } from "./commands/rename.js"
 import { register as registerDb } from "./commands/db.js"
+import { register as registerList } from "./commands/list.js"
 
 const program = new Command()
-  .name("morea")
+  .name("cli")
   .description(
     "CLI lokal untuk project Turborepo — test, generator unit test, git push, setup bootstrap, rename, dan utilitas database. Khusus project ini, tidak dipublish."
   )
@@ -19,7 +20,7 @@ const program = new Command()
   .showHelpAfterError()
   .configureOutput({
     outputError: (str, write) =>
-      write(`${str}Gunakan \`pnpm morea --help\` untuk daftar perintah.\n`),
+      write(`${str}Gunakan \`pnpm cli --help\` untuk daftar perintah.\n`),
   })
 
 registerTest(program)
@@ -28,6 +29,7 @@ registerPush(program)
 registerBootstrap(program)
 registerRename(program)
 registerDb(program)
+registerList(program)
 
 if (process.argv.slice(2).length === 0) {
   banner()

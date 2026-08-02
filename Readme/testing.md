@@ -12,18 +12,18 @@ Monorepo ini punya **129 test otomatis** dalam 2 package audit terpisah di bawah
 ## ▶️ Menjalankan Test
 
 ```bash
-Semua perintah dijalankan lewat CLI lokal `morea` (`scripts/cli/` — Commander; peruntukan di `commands/`, implementasi di `lib/`):
+Semua perintah dijalankan lewat CLI lokal `cli` (`scripts/cli/` — Commander; peruntukan di `commands/`, implementasi di `lib/`). Semua perintah tersedia di `pnpm cli list`:
 
-pnpm morea test               # menu: unitest / security / all → lalu pilih folder & file
-pnpm morea test unitest       # unitest langsung — menu pilih folder (lib / ui), lalu file
-pnpm morea test security      # security langsung — menu pilih folder (unit / integration), lalu file
-pnpm morea test all           # unit + security sekaligus (tanpa menu)
+pnpm test               # menu: unitest / security / all → lalu pilih folder & file
+pnpm test unitest       # unitest langsung — menu pilih folder (lib / ui), lalu file
+pnpm test security      # security langsung — menu pilih folder (unit / integration), lalu file
+pnpm test all           # unit + security sekaligus (tanpa menu)
 
 # Langsung tanpa menu (lewatkan prompt):
-pnpm morea test unitest ui            # semua file di folder ui
-pnpm morea test unitest ui/button.test.tsx  # satu file
-pnpm morea test security unit         # semua file di folder unit (security)
-pnpm morea test security integration  # integrasi live API
+pnpm test unitest ui            # semua file di folder ui
+pnpm test unitest ui/button.test.tsx  # satu file
+pnpm test security unit         # semua file di folder unit (security)
+pnpm test security integration  # integrasi live API
 
 # Alias lama tetap tersedia:
 pnpm test:ui            # hanya UI (filter @workspace/audit-vitest)
@@ -32,14 +32,14 @@ pnpm test:security      # hanya security
 
 Menu folder/file dibuat **dinamis** dari isi `<package>/src/` — folder tanpa file test di-skip, input bisa nomor atau nama folder, dan Enter = semua. Untuk security, peringatan API dev (`localhost:4000`) tetap muncul sebelum eksekusi.
 
-### ⚡ Generator test — `pnpm morea unitest create`
+### ⚡ Generator test — `pnpm unitest create`
 
 Membuat skeleton unit test untuk komponen/fungsi `@workspace/shadcn`, disalin ke `audit/vitest/src/<folder-asal>/` (mencerminkan `packages/shadcn/src/`):
 
 ```bash
-pnpm morea unitest create              # menu pilih folder & file
-pnpm morea unitest create ui           # pilih file di folder ui
-pnpm morea unitest create ui accordion.tsx   # buat test langsung
+pnpm unitest create              # menu pilih folder & file
+pnpm unitest create ui           # pilih file di folder ui
+pnpm unitest create ui accordion.tsx   # buat test langsung
 ```
 
 Yang dihasilkan otomatis:
@@ -80,16 +80,16 @@ audit/vitest/
     ├── lib/                       # api.test.ts (8) · utils.test.ts (6)
     ├── ui/                        # 27 file — satu per komponen
     │   ├── button.test.tsx        # render, data-slot, onClick, disabled, varian
-    │   ├── accordion.test.tsx     # hasil pnpm morea unitest create
+    │   ├── accordion.test.tsx     # hasil pnpm unitest create
     │   └── … (avatar, breadcrumb, calendar, checkbox, collapsible, dialog,
     │        dropdown-menu, field, input, input-group, label, navigation-menu,
     │        popover, scroll-area, select, separator, sheet, sidebar, skeleton,
     │        table, tabs, textarea, theme-provider, tooltip)
     ├── hooks/
-    │   └── use-mobile.test.ts     # renderHook (hasil pnpm morea unitest create)
+    │   └── use-mobile.test.ts     # renderHook (hasil pnpm unitest create)
     └── components/
-        ├── auth/login.test.tsx    # hasil pnpm morea unitest create (todo: butuh onLogin)
-        └── data-table/data-table.test.tsx  # hasil pnpm morea unitest create (todo: butuh data/columns)
+        ├── auth/login.test.tsx    # hasil pnpm unitest create (todo: butuh onLogin)
+        └── data-table/data-table.test.tsx  # hasil pnpm unitest create (todo: butuh data/columns)
 ````
 
 ### `setup.ts` — polyfill yang penting

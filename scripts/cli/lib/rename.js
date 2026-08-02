@@ -8,7 +8,7 @@ const NAME_RE = /^[a-zA-Z0-9._-]+$/
 const TARGETS = ["README.md", "Readme/use.md"]
 
 export async function runRename({ name }) {
-  if (!name) throw new Error("Penggunaan: pnpm morea rename <nama-proyek>")
+  if (!name) throw new Error("Penggunaan: pnpm rename <nama-proyek>")
   if (!NAME_RE.test(name)) {
     throw new Error(
       "Nama hanya boleh berisi huruf, angka, titik, strip, atau underscore."

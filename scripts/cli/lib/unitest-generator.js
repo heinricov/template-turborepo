@@ -210,12 +210,12 @@ export async function createTest({ folder, file }) {
   let dir = folder ? resolveDir(folder) : await pickDir()
   if (!dir)
     throw new Error(
-      "Folder tidak diberikan — gunakan: pnpm morea unitest create <folder> [file]"
+      "Folder tidak diberikan — gunakan: pnpm unitest create <folder> [file]"
     )
   let srcFile = file ? resolveFile(dir, file) : await pickSrcFile(dir)
   if (!srcFile)
     throw new Error(
-      `File tidak diberikan di folder ${dir} — gunakan: pnpm morea unitest create ${dir} <file>`
+      `File tidak diberikan di folder ${dir} — gunakan: pnpm unitest create ${dir} <file>`
     )
 
   const base = srcFile.replace(/\.\w+$/, "")
@@ -300,7 +300,7 @@ export async function createTest({ folder, file }) {
 
   // ── konten ─────────────────────────────────────────────────────────────
   let content =
-    "// File uji otomatis dari `pnpm morea unitest create` — sesuaikan sesuai kebutuhan.\n\n"
+    "// File uji otomatis dari `pnpm unitest create` — sesuaikan sesuai kebutuhan.\n\n"
   if (needRender) {
     content += `import { render } from "@testing-library/react"\n`
     if (needUser)

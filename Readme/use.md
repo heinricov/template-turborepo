@@ -149,7 +149,7 @@ Diagram dan alur data yang lebih dalam di **[`architecture.md`](architecture.md)
 │   └── vitest/     # 🧪 @workspace/audit-vitest — 102 test UI (jsdom)
 ├── config/         # ⚙️ @workspace/config — preset ESLint & tsconfig
 ├── scripts/
-│   └── cli/                 # ⚡ morea-cli — satu CLI lokal (Commander)
+│   └── cli/                 # ⚡ workspace-cli — satu CLI lokal (Commander)
 │       ├── index.js         #     setup tunggal + banner
 │       ├── commands/        #     peruntukan: definisi perintah & help
 │       │   └── test.js · unitest.js · push.js · bootstrap.js · rename.js · db.js
@@ -210,15 +210,15 @@ Katalog komponen dan contoh penggunaannya di **[`components.md`](components.md)*
 | `@workspace/audit-security` | Unit JWT + integrasi | Node (server dev :4000) | **37 test** (21 unit + 16 integrasi) |
 
 ```bash
-pnpm morea test               # menu: unitest / security / all → pilih folder & file
-pnpm morea test unitest ui    # langsung folder ui (tanpa menu)
-pnpm morea test security unit # langsung folder unit (security)
+pnpm test               # menu: unitest / security / all → pilih folder & file
+pnpm test unitest ui    # langsung folder ui (tanpa menu)
+pnpm test security unit # langsung folder unit (security)
 pnpm test:ui            # hanya audit-vitest (102 test)
 pnpm test:security      # hanya audit-security (37 test)
 
 # Generator skeleton unit test untuk @workspace/shadcn:
-pnpm morea unitest create            # menu pilih folder & file
-pnpm morea unitest create ui accordion.tsx  # langsung buat test
+pnpm unitest create            # menu pilih folder & file
+pnpm unitest create ui accordion.tsx  # langsung buat test
 ```
 
 > ⚠️ **Catatan**: test integrasi `audit-security` berkomunikasi langsung dengan API di `http://localhost:4000`. Jalankan `pnpm dev` terlebih dahulu — jika server tidak aktif, test **sengaja gagal dengan pesan yang jelas**, bukan diam-diam di-skip.
@@ -231,8 +231,8 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 
 | Script               | Deskripsi                                                                       |
 | -------------------- | ------------------------------------------------------------------------------- |
-| `pnpm morea`        | CLI lokal (Commander) — banner + semua perintah (test, unitest, push, …) |
-| `pnpm morea db`     | Utilitas data: `sqlite`/`pgsql` + tables/push/delete/seed                |
+| `pnpm cli`          | CLI lokal (Commander) — banner + daftar perintah (`pnpm cli list`)       |
+| `pnpm sqlite` / `pgsql` | Utilitas data langsung: tables/push/delete/seed                      |
 | `pnpm bootstrap`    | Setup awal pasca-clone (env, install, database) — idempotent             |
 | `pnpm dev`          | Jalankan **semua** app secara bersamaan (web 3000, admin 3001, api 4000) |
 | `pnpm build`        | Build semua workspace (dengan cache Turbo)                               |
@@ -246,13 +246,13 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 
 Script spesifik per app (`next dev`, `nest start`, `vite`, `prisma db push`, dst.) ada di **[`development.md`](development.md)**.
 
-### 🚀 Git Workflow — `pnpm morea push`
+### 🚀 Git Workflow — `pnpm push`
 
-Alias untuk CLI lokal `morea` (`scripts/cli/`) — satu perintah untuk `git add .`, commit, dan push. Setiap push juga **mencatat commit ke tabel di `commit.md`** (kolom: `datetime`, `commit`, `type`, `file list`):
+Perintah `push` pada CLI lokal `cli` (`scripts/cli/`; alias `pnpm push`) — satu perintah untuk `git add .`, commit, dan push. Setiap push juga **mencatat commit ke tabel di `commit.md`** (kolom: `datetime`, `commit`, `type`, `file list`):
 
 ```bash
 pnpm push                              # interaktif (prompt pesan & tipe)
-pnpm morea push -m "fix: typo" -t fix  # langsung, tanpa prompt
+pnpm push -m "fix: typo" -t fix  # langsung, tanpa prompt
 ```
 
 Perilakunya:
@@ -265,9 +265,9 @@ Perilakunya:
 
 ---
 
-## 🗄️ Utilitas Data CLI — `pnpm morea db sqlite` / `pgsql`
+## 🗄️ Utilitas Data CLI — `pnpm sqlite` / `pgsql`
 
-Manipulasi data langsung dari terminal (perintah `db` pada CLI `morea`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+Manipulasi data langsung dari terminal (perintah `db` pada CLI `cli` — alias `pnpm sqlite`/`pnpm pgsql`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
 
 | Perintah                                                           | Fungsi                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
