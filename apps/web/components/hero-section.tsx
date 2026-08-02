@@ -54,7 +54,10 @@ const commands = [
   { command: "pnpm lint", description: "ESLint semua workspace" },
   { command: "pnpm typecheck", description: "tsc --noEmit semua workspace" },
   { command: "pnpm format", description: "Prettier — tulis ulang semua file" },
-  { command: "pnpm test", description: "Jalankan semua test (UI + security)" },
+  {
+    command: "pnpm test",
+    description: "Tanya pilihan: unitest / security / all",
+  },
   {
     command: "pnpm test:ui",
     description: "Hanya test @workspace/audit-vitest",

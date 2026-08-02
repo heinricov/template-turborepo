@@ -52,7 +52,7 @@ pnpm --filter @workspace/db db:push
 ```bash
 pnpm sqlite seed User   # isi akun contoh: admin / admin@admin.com / admin1234 (role admin)
                         #                    user  / user@user.com  / user1234  (role user)
-pnpm test               # jalankan semua test
+pnpm test               # tanya pilihan: unitest / security / all
 ```
 
 ---
@@ -155,6 +155,7 @@ Diagram dan alur data yang lebih dalam di **[`architecture.md`](architecture.md)
 │   │   └── templates/      #     Template README.md yang ditulis bootstrap
 │   ├── workspace-db/       # 🗄️ CLI data: pnpm sqlite / pnpm pgsql (push, delete, seed, tables)
 │   │   └── db-ops.js
+│   ├── workspace-test/     # 🧪 pnpm test — interaktif (unitest / security / all)
 │   └── github/push         # 🚀 git add + commit + push + catat ke commit.md
 ├── commit.md       # 📝 Catatan commit otomatis (datetime, commit, type, file list)
 ├── turbo.json      # 🌀 Konfigurasi pipeline Turborepo
@@ -209,7 +210,7 @@ Katalog komponen dan contoh penggunaannya di **[`components.md`](components.md)*
 | `@workspace/audit-security` | Unit JWT + integrasi | Node (server dev :4000) | **37 test** (21 unit + 16 integrasi) |
 
 ```bash
-pnpm test               # semua test (turbo)
+pnpm test               # interaktif: tanya unitest / security / all
 pnpm test:ui            # hanya audit-vitest (92 test)
 pnpm test:security      # hanya audit-security (37 test)
 ```
@@ -230,7 +231,7 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 | `pnpm lint`          | ESLint semua workspace                                                          |
 | `pnpm typecheck`     | `tsc --noEmit` semua workspace                                                  |
 | `pnpm format`        | Prettier — tulis ulang semua file                                               |
-| `pnpm test`          | Semua test (UI + security)                                                      |
+| `pnpm test`          | Interaktif — tanya: unitest / security / all                                    |
 | `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                                 |
 | `pnpm test:security` | Hanya `@workspace/audit-security`                                               |
 | `pnpm push`          | `git add .` → commit → push + catat ke tabel `commit.md` (type: add/fix/update) |

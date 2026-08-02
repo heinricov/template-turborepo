@@ -80,7 +80,7 @@ pnpm dev
 
 ```bash
 pnpm sqlite seed User   # isi akun contoh: admin / admin@admin.com / admin1234 · user / user@user.com / user1234
-pnpm test               # jalankan semua test (UI + security)
+pnpm test               # tanya pilihan: unitest / security / all
 ```
 
 ### PostgreSQL (mis. Prisma Postgres di Vercel)
@@ -97,7 +97,7 @@ API otomatis beralih ke PostgreSQL saat salah satu env di atas terisi — lokal 
 
 ## 🧰 Perintah Berdasarkan Peruntukan
 
-Semua script disimpan di `scripts/` sesuai peruntukannya: **`workspace-clone/`** (setup & tooling pasca-clone) dan **`workspace-db/`** (urusan database).
+Semua script disimpan di `scripts/` sesuai peruntukannya: **`workspace-clone/`** (setup & tooling pasca-clone), **`workspace-db/`** (urusan database), dan **`workspace-test/`** (menjalankan test).
 
 ### 🚀 Setup & Clone — `scripts/workspace-clone/`
 
@@ -136,7 +136,7 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 | `pnpm lint`          | Lint semua package                                    |
 | `pnpm typecheck`     | TypeScript typecheck                                  |
 | `pnpm format`        | Format kode dengan Prettier                           |
-| `pnpm test`          | Jalankan semua test (UI + security)                   |
+| `pnpm test`          | Tanya pilihan jenis test: unitest / security / all    |
 | `pnpm test:ui`       | Test UI saja (Vitest — 92 test)                       |
 | `pnpm test:security` | Test security JWT saja (37 test)                      |
 

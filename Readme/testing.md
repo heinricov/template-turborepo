@@ -12,7 +12,7 @@ Monorepo ini punya **129 test otomatis** dalam 2 package audit terpisah di bawah
 ## ▶️ Menjalankan Test
 
 ```bash
-pnpm test               # semua (turbo, cache=false)
+pnpm test               # interaktif: tanya unitest / security / all
 pnpm test:ui            # hanya UI (filter @workspace/audit-vitest)
 pnpm test:security      # hanya security
 

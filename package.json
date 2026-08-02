@@ -8,7 +8,7 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
-    "test": "turbo test",
+    "test": "bash scripts/workspace-test/test",
     "test:ui": "turbo test --filter=@workspace/audit-vitest",
     "test:security": "turbo test --filter=@workspace/audit-security",
     "sqlite": "pnpm --filter @workspace/db sqlite",

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Jalankan test interaktif — pilih jenis: unitest / security / all.
+# Penggunaan: pnpm test
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+ROOT="$PWD"
+
+# ── Warna (otomatis polos saat bukan TTY / NO_COLOR diset) ────────────────
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'; C_DIM=$'\e[2m'
+  C_CYAN=$'\e[36m'; C_GREEN=$'\e[32m'; C_YELLOW=$'\e[33m'; C_RED=$'\e[31m'
+else
+  C_RESET=""; C_BOLD=""; C_DIM=""; C_CYAN=""; C_GREEN=""; C_YELLOW=""; C_RED=""
+fi
+
+WIDTH=56
+blen() { printf '%s' "$1" | LC_ALL=en_US.UTF-8 wc -m | tr -d ' '; }
+box_top()    { printf '%s╔%s╗%s\n' "$C_BOLD$C_RED" "$(printf '═%.0s' $(seq 1 "$WIDTH"))" "$C_RESET"; }
+box_bottom() { printf '%s╚%s╝%s\n' "$C_BOLD$C_RED" "$(printf '═%.0s' $(seq 1 "$WIDTH"))" "$C_RESET"; }
+box_line() {
+  local text="$1" style="${2:-}"
+  local pad=$(( WIDTH - 4 - $(blen "$text") ))
+  [[ $pad -lt 0 ]] && pad=0
+  printf '║  %s%s%s%*s║\n' "$style" "$text" "$C_RESET" "$pad" ""
+}
+
+api_running() {
+  curl -s -m 2 http://localhost:4000/ >/dev/null 2>&1
+}
+
+printf '%s── Pilih jenis test ──%s\n' "$C_BOLD$C_CYAN" "$C_RESET"
+printf '  1) %sUnit test%s   (92 test UI — audit-vitest)\n' "$C_GREEN" "$C_RESET"
+printf '  2) %sSecurity%s    (37 test JWT — audit-security, butuh API dev)\n' "$C_GREEN" "$C_RESET"
+printf '  3) %sSemua%s       (unit + security)\n' "$C_GREEN" "$C_RESET"
+read -rp "Pilihan (1/2/3, unitest/security/all) [all]: " CHOICE || true
+echo
+
+case "${CHOICE:-all}" in
+  1 | unitest | ui | unit)
+    MODE="unitest"
+    ;;
+  2 | security)
+    MODE="security"
+    ;;
+  3 | all | semua)
+    MODE="all"
+    ;;
+  *)
+    printf '    %s✗ Pilihan tidak dikenal: %s — gunakan 1/2/3 atau unitest/security/all%s\n' "$C_RED" "$CHOICE" "$C_RESET"
+    exit 1
+    ;;
+esac
+
+if [[ "$MODE" == "security" || "$MODE" == "all" ]] && ! api_running; then
+  box_top
+  box_line "⚠ API dev tidak berjalan di http://localhost:4000" "$C_RED"
+  box_line "Test security/integration akan gagal." "$C_RED"
+  box_line "Jalankan dulu: pnpm dev (di terminal lain)" "$C_RED"
+  box_bottom
+  read -rp "Lanjut tetap jalankan? (y/N) " PROCEED || true
+  if [[ "${PROCEED:-n}" != "y" && "${PROCEED:-n}" != "Y" ]]; then
+    echo "    Dibatalkan."
+    exit 0
+  fi
+  echo
+fi
+
+SECONDS=0
+case "$MODE" in
+  unitest)
+    echo "==> Unit test (audit-vitest)"
+    pnpm test:ui
+    ;;
+  security)
+    echo "==> Security test (audit-security)"
+    pnpm test:security
+    ;;
+  all)
+    echo "==> Semua test (unit + security)"
+    pnpm exec turbo test
+    ;;
+esac
+
+echo
+printf '    %s✔ Selesai dalam %ss — mode: %s%s\n' "$C_GREEN" "$SECONDS" "$MODE" "$C_RESET"
