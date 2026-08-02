@@ -155,7 +155,8 @@ Diagram dan alur data yang lebih dalam di **[`architecture.md`](architecture.md)
 │   │   └── templates/      #     Template README.md yang ditulis bootstrap
 │   ├── workspace-db/       # 🗄️ CLI data: pnpm sqlite / pnpm pgsql (push, delete, seed, tables)
 │   │   └── db-ops.js
-│   └── github/push         # 🚀 git add + commit + push dalam satu perintah
+│   └── github/push         # 🚀 git add + commit + push + catat ke commit.md
+├── commit.md       # 📝 Catatan commit otomatis (datetime, commit, type, file list)
 ├── turbo.json      # 🌀 Konfigurasi pipeline Turborepo
 └── pnpm-workspace.yaml
 ```
@@ -232,13 +233,13 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 | `pnpm test`          | Semua test (UI + security)                                               |
 | `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                          |
 | `pnpm test:security` | Hanya `@workspace/audit-security`                                        |
-| `pnpm push`          | `git add .` → `git commit` → `git push` dalam satu perintah              |
+| `pnpm push`          | `git add .` → commit → push + catat ke tabel `commit.md` (type: add/fix/update) |
 
 Script spesifik per app (`next dev`, `nest start`, `vite`, `prisma db push`, dst.) ada di **[`development.md`](development.md)**.
 
 ### 🚀 Git Workflow — `pnpm push`
 
-Alias untuk `scripts/github/push` — satu perintah untuk `git add .`, commit, dan push:
+Alias untuk `scripts/github/push` — satu perintah untuk `git add .`, commit, dan push. Setiap push juga **mencatat commit ke tabel di `commit.md`** (kolom: `datetime`, `commit`, `type`, `file list`):
 
 ```bash
 pnpm push

@@ -112,6 +112,15 @@ fi
 
 sed "s/nama-proyek-anda/${PROJECT_DIR_NAME}/g" "$ROOT/scripts/workspace-clone/templates/README.md" >"$ROOT/README.md"
 
+cat >"$ROOT/commit.md" <<'EOF'
+# 📝 Catatan Commit
+
+Tabel ini diisi otomatis oleh `pnpm push` — satu baris per commit.
+
+| datetime            | commit | type | file list |
+| ------------------- | ------ | ---- | --------- |
+EOF
+
 # ── 1/4 Environment files ─────────────────────────────────────────────────
 echo
 step 1 4 "Environment files"

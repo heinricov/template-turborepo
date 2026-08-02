@@ -58,6 +58,7 @@ pnpm push        # atau: ./scripts/github/push
 ```
 
 - Bertanya `Commit message (Enter untuk default):` — jika kosong, dipakai `commit-<datetime saat push>` (mis. `commit-2026-08-01 15:11:27`).
+- Bertanya `Tipe commit (add/fix/update) [update]:` — baris commit dicatat ke tabel di **`commit.md`** (kolom: `datetime`, `commit`, `type`, `file list`).
 - Tanpa perubahan: pesan informasi dicetak, push tetap dijalankan.
 - Error pada `git add`/`git push` menghentikan script (via `set -euo pipefail`).
 

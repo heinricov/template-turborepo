@@ -56,7 +56,7 @@ pnpm bootstrap
 
 `pnpm bootstrap` melakukan semuanya sekaligus (aman dijalankan ulang):
 
-1. **Bersihkan dokumen template** — menghapus folder `Readme/` internal dan menulis `README.md` versi ringkas ini.
+1. **Bersihkan dokumen template** — menghapus folder `Readme/` internal, menulis `README.md` versi ringkas ini, dan mengosongkan tabel `commit.md`.
 2. **Environment files** — membuat `apps/api/.env` (dengan `JWT_SECRET` acak) dan `packages/db/.env` (dengan `DATABASE_URL_PGSQL` kosong). File yang sudah ada tidak ditimpa.
 3. **Install dependencies** — `pnpm install` (reproducible via `pnpm-lock.yaml`).
 4. **Generate Prisma Client & build** — `db:generate` (SQLite) + `db:generate:pgsql` (PostgreSQL), lalu build `@workspace/db` (menghasilkan `dist/` yang dipakai aplikasi & CLI).
@@ -144,4 +144,4 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 
 | Perintah    | Fungsi                                          |
 | ----------- | ----------------------------------------------- |
-| `pnpm push` | Satu perintah untuk `git add .` → commit → push |
+| `pnpm push` | Satu perintah `git add .` → commit → push — mencatat commit ke tabel `commit.md` (type: add/fix/update) |

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
+# git add . → commit → push, plus catat commit ke commit.md (tabel: datetime, commit, type, file list).
+# Penggunaan: pnpm push
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
+ROOT="$PWD"
 
 read -rp "Commit message (Enter untuk default): " MESSAGE || true
 
@@ -9,6 +12,36 @@ if [[ -z "$MESSAGE" ]]; then
   MESSAGE="commit - $(date '+%Y-%m-%d %H:%M:%S')"
 fi
 
+read -rp "Tipe commit (add/fix/update) [update]: " TYPE || true
+TYPE="${TYPE:-update}"
+if [[ "$TYPE" != "add" && "$TYPE" != "fix" && "$TYPE" != "update" ]]; then
+  echo "✗ Tipe harus salah satu dari: add, fix, update."
+  exit 1
+fi
+
 git add .
+
+if git diff --cached --quiet; then
+  echo "Tidak ada perubahan untuk di-commit — lanjut push."
+else
+  if [[ ! -f "$ROOT/commit.md" ]]; then
+    cat >"$ROOT/commit.md" <<'EOF'
+# 📝 Catatan Commit
+
+Tabel ini diisi otomatis oleh `pnpm push` — satu baris per commit.
+
+| datetime            | commit | type | file list |
+| ------------------- | ------ | ---- | --------- |
+EOF
+  fi
+
+  FILES="$(git diff --cached --name-only | grep -v '^commit\.md$' | sed 's/^/`/; s/$/`/' | paste -sd ', ' - || true)"
+  DATETIME="$(date '+%Y-%m-%d %H:%M:%S')"
+  MESSAGE_ESC="${MESSAGE//|/\\|}"
+  FILES_ESC="${FILES//|/\\|}"
+  printf '| %s | %s | %s | %s |\n' "$DATETIME" "$MESSAGE_ESC" "$TYPE" "$FILES_ESC" >>"$ROOT/commit.md"
+  git add "$ROOT/commit.md"
+fi
+
 git commit -m "$MESSAGE" || echo "Tidak ada perubahan untuk di-commit — lanjut push."
 git push
