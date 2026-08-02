@@ -35,7 +35,16 @@ Tabel ini diisi otomatis oleh `pnpm push` — satu baris per commit.
 EOF
   fi
 
-  FILES="$(git diff --cached --name-only | grep -v '^commit\.md$' | sed 's/^/`/; s/$/`/' | paste -sd ', ' - || true)"
+  FILES=""
+  while IFS= read -r f; do
+    f="${f//|/\\|}"
+    if [[ -n "$FILES" ]]; then
+      FILES+=", \`$f\`"
+    else
+      FILES="\`$f\`"
+    fi
+  done < <(git diff --cached --name-only | grep -v '^commit\.md$')
+  [[ -z "$FILES" ]] && FILES="\`commit.md\`"
   DATETIME="$(date '+%Y-%m-%d %H:%M:%S')"
   MESSAGE_ESC="${MESSAGE//|/\\|}"
   FILES_ESC="${FILES//|/\\|}"
