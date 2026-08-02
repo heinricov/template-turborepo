@@ -12,16 +12,33 @@ Monorepo ini punya **129 test otomatis** dalam 2 package audit terpisah di bawah
 ## ▶️ Menjalankan Test
 
 ```bash
-pnpm test               # interaktif: tanya unitest / security / all
+pnpm test               # menu: unitest / security / all → lalu pilih folder & file
+pnpm test unitest       # unitest langsung — menu pilih folder (lib / ui), lalu file
+pnpm test security      # security langsung — menu pilih folder (unit / integration), lalu file
+pnpm test all           # unit + security sekaligus (tanpa menu)
+
+# Langsung tanpa menu (lewatkan prompt):
+pnpm test unitest ui            # semua file di folder ui
+pnpm test unitest ui/button.test.tsx  # satu file
+pnpm test security unit         # semua file di folder unit (security)
+pnpm test security integration  # integrasi live API
+
+# Alias lama tetap tersedia:
 pnpm test:ui            # hanya UI (filter @workspace/audit-vitest)
 pnpm test:security      # hanya security
+```
+
+Menu folder/file dibuat **dinamis** dari isi `<package>/src/` — folder tanpa file test di-skip, input bisa nomor atau nama folder, dan Enter = semua. Untuk security, peringatan API dev (`localhost:4000`) tetap muncul sebelum eksekusi.
 
 # Watch mode (per package)
+
 pnpm --filter @workspace/audit-vitest test:watch
 pnpm --filter @workspace/audit-security test:watch
 
 # Satu file saja
+
 pnpm --filter @workspace/audit-vitest exec vitest run src/ui/button.test.tsx
+
 ```
 
 > Task `test` di `turbo.json` ber-cache `false` — selalu dijalankan ulang, dan `dependsOn: ^build` (package yang dibutuhkan dibuild dulu).
@@ -35,23 +52,25 @@ Menguji komponen `@workspace/shadcn` di **jsdom** dengan **Vitest + Testing Libr
 ### Struktur
 
 ```
+
 audit/vitest/
-├── vitest.config.ts     # environment: jsdom, setupFiles: ./setup.ts
-├── setup.ts             # polyfill & matchers global
+├── vitest.config.ts # environment: jsdom, setupFiles: ./setup.ts
+├── setup.ts # polyfill & matchers global
 └── src/
-    ├── lib/
-    │   ├── api.test.ts       # 8 test — apiFetch (header, token, error, fallback)
-    │   └── utils.test.ts     # 6 test — cn() (merge, konflik twMerge, dsb.)
-    └── ui/                   # 26 file — satu per komponen
-        ├── button.test.tsx   # render, data-slot, onClick, disabled, varian
-        ├── dialog.test.tsx   # buka/tutup, role, tombol close
-        ├── select.test.tsx   # open, pilih opsi, defaultValue
-        ├── sidebar.test.tsx  # provider, error tanpa provider, toggle
-        ├── theme-provider.test.tsx  # hotkey D, double-press, tidak saat mengetik
-        └── … (avatar, breadcrumb, calendar, checkbox, collapsible, dropdown-menu,
-             field, input, input-group, label, navigation-menu, popover, scroll-area,
-             separator, sheet, skeleton, table, tabs, textarea, tooltip)
-```
+├── lib/
+│ ├── api.test.ts # 8 test — apiFetch (header, token, error, fallback)
+│ └── utils.test.ts # 6 test — cn() (merge, konflik twMerge, dsb.)
+└── ui/ # 26 file — satu per komponen
+├── button.test.tsx # render, data-slot, onClick, disabled, varian
+├── dialog.test.tsx # buka/tutup, role, tombol close
+├── select.test.tsx # open, pilih opsi, defaultValue
+├── sidebar.test.tsx # provider, error tanpa provider, toggle
+├── theme-provider.test.tsx # hotkey D, double-press, tidak saat mengetik
+└── … (avatar, breadcrumb, calendar, checkbox, collapsible, dropdown-menu,
+field, input, input-group, label, navigation-menu, popover, scroll-area,
+separator, sheet, skeleton, table, tabs, textarea, tooltip)
+
+````
 
 ### `setup.ts` — polyfill yang penting
 
@@ -123,7 +142,7 @@ pnpm dev &         # jalankan server di background
 sleep 12
 pnpm test:security
 kill %1
-```
+````
 
 ---
 

@@ -80,7 +80,9 @@ pnpm dev
 
 ```bash
 pnpm sqlite seed User   # isi akun contoh: admin / admin@admin.com / admin1234 · user / user@user.com / user1234
-pnpm test               # tanya pilihan: unitest / security / all
+pnpm test               # pilih unitest / security / all — lalu pilih folder & file
+pnpm test unitest ui    # langsung: folder ui tanpa menu
+pnpm test security unit # langsung: folder unit (security)
 ```
 
 ### PostgreSQL (mis. Prisma Postgres di Vercel)
@@ -129,16 +131,16 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 
 ### 📦 Menjalankan & Development
 
-| Perintah             | Fungsi                                                |
-| -------------------- | ----------------------------------------------------- |
-| `pnpm dev`           | Jalankan semua app (web 3000 · admin 3001 · api 4000) |
-| `pnpm build`         | Build semua package                                   |
-| `pnpm lint`          | Lint semua package                                    |
-| `pnpm typecheck`     | TypeScript typecheck                                  |
-| `pnpm format`        | Format kode dengan Prettier                           |
-| `pnpm test`          | Tanya pilihan jenis test: unitest / security / all    |
-| `pnpm test:ui`       | Test UI saja (Vitest — 92 test)                       |
-| `pnpm test:security` | Test security JWT saja (37 test)                      |
+| Perintah             | Fungsi                                                 |
+| -------------------- | ------------------------------------------------------ |
+| `pnpm dev`           | Jalankan semua app (web 3000 · admin 3001 · api 4000)  |
+| `pnpm build`         | Build semua package                                    |
+| `pnpm lint`          | Lint semua package                                     |
+| `pnpm typecheck`     | TypeScript typecheck                                   |
+| `pnpm format`        | Format kode dengan Prettier                            |
+| `pnpm test`          | Menu pilihan: unitest / security / all (folder & file) |
+| `pnpm test:ui`       | Test UI saja (Vitest — 92 test)                        |
+| `pnpm test:security` | Test security JWT saja (37 test)                       |
 
 ### 🔄 Git & GitHub — `scripts/github/`
 

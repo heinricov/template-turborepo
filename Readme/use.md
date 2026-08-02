@@ -52,7 +52,7 @@ pnpm --filter @workspace/db db:push
 ```bash
 pnpm sqlite seed User   # isi akun contoh: admin / admin@admin.com / admin1234 (role admin)
                         #                    user  / user@user.com  / user1234  (role user)
-pnpm test               # tanya pilihan: unitest / security / all
+pnpm test               # menu: unitest / security / all → pilih folder & file
 ```
 
 ---
@@ -210,7 +210,9 @@ Katalog komponen dan contoh penggunaannya di **[`components.md`](components.md)*
 | `@workspace/audit-security` | Unit JWT + integrasi | Node (server dev :4000) | **37 test** (21 unit + 16 integrasi) |
 
 ```bash
-pnpm test               # interaktif: tanya unitest / security / all
+pnpm test               # menu: unitest / security / all → pilih folder & file
+pnpm test unitest ui    # langsung folder ui (tanpa menu)
+pnpm test security unit # langsung folder unit (security)
 pnpm test:ui            # hanya audit-vitest (92 test)
 pnpm test:security      # hanya audit-security (37 test)
 ```
@@ -231,7 +233,7 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 | `pnpm lint`          | ESLint semua workspace                                                          |
 | `pnpm typecheck`     | `tsc --noEmit` semua workspace                                                  |
 | `pnpm format`        | Prettier — tulis ulang semua file                                               |
-| `pnpm test`          | Interaktif — tanya: unitest / security / all                                    |
+| `pnpm test`          | Interaktif — unitest / security / all, bisa pilih folder & file                 |
 | `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                                 |
 | `pnpm test:security` | Hanya `@workspace/audit-security`                                               |
 | `pnpm push`          | `git add .` → commit → push + catat ke tabel `commit.md` (type: add/fix/update) |

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# Jalankan test interaktif — pilih jenis: unitest / security / all.
-# Penggunaan: pnpm test
+# Jalankan test — pilih jenis: unitest / security / all, plus pilihan folder & file.
+# Penggunaan: pnpm test [unitest|security|all] [folder] [file]
+# Contoh:
+#   pnpm test                         → menu interaktif
+#   pnpm test unitest                 → menu folder unitest, lalu file
+#   pnpm test unitest ui              → langsung folder ui
+#   pnpm test unitest ui/button.test.tsx → langsung 1 file
+#   pnpm test security unit           → langsung folder unit (security)
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
@@ -29,28 +35,167 @@ api_running() {
   curl -s -m 2 http://localhost:4000/ >/dev/null 2>&1
 }
 
-printf '%s── Pilih jenis test ──%s\n' "$C_BOLD$C_CYAN" "$C_RESET"
-printf '  1) %sUnit test%s   (92 test UI — audit-vitest)\n' "$C_GREEN" "$C_RESET"
-printf '  2) %sSecurity%s    (37 test JWT — audit-security, butuh API dev)\n' "$C_GREEN" "$C_RESET"
-printf '  3) %sSemua%s       (unit + security)\n' "$C_GREEN" "$C_RESET"
-read -rp "Pilihan (1/2/3, unitest/security/all) [all]: " CHOICE || true
-echo
+# ── utilitas target test ───────────────────────────────────────────────────
+has_tests() {
+  local d="$1" f
+  for f in "$d"/*.test.ts "$d"/*.test.tsx; do
+    [[ -f "$f" ]] && return 0
+  done
+  return 1
+}
 
-case "${CHOICE:-all}" in
-  1 | unitest | ui | unit)
-    MODE="unitest"
-    ;;
-  2 | security)
-    MODE="security"
-    ;;
-  3 | all | semua)
-    MODE="all"
-    ;;
-  *)
-    printf '    %s✗ Pilihan tidak dikenal: %s — gunakan 1/2/3 atau unitest/security/all%s\n' "$C_RED" "$CHOICE" "$C_RESET"
+count_tests() {
+  local d="$1" n=0 f
+  for f in "$d"/*.test.ts "$d"/*.test.tsx; do
+    [[ -f "$f" ]] && n=$((n + 1))
+  done
+  echo "$n"
+}
+
+list_folders() {
+  local src="$1" d
+  for d in "$src"/*/; do
+    [[ -d "$d" ]] || continue
+    has_tests "$d" && echo "$(basename "$d")"
+  done
+}
+
+list_files() {
+  local folder="$1" f
+  for f in "$folder"/*.test.ts "$folder"/*.test.tsx; do
+    [[ -f "$f" ]] && echo "$(basename "$f")"
+  done
+}
+
+# ── menu interaktif ────────────────────────────────────────────────────────
+menu_folders() {
+  local src="$1" label="$2"
+  local folders=() choice="" i=1 f
+  while IFS= read -r f; do folders+=("$f"); done < <(list_folders "$src")
+
+  if (( ${#folders[@]} == 0 )); then
+    echo ""
+    return 0
+  fi
+
+  printf '\n%s── Pilih folder test %s (%s) ──%s\n' "$C_BOLD$C_CYAN" "$label" "$src" "$C_RESET" >&2
+  for f in "${folders[@]}"; do
+    printf '  %d) %s%s%s   (%d file test)\n' "$i" "$C_GREEN" "$f" "$C_RESET" "$(count_tests "$src/$f")" >&2
+    i=$((i + 1))
+  done
+  printf '  %d) %s%s%s   (semua folder)\n' "$i" "$C_GREEN" "*" "$C_RESET" >&2
+  read -rp "Pilihan (nomor/nama folder, Enter=semua) [semua]: " choice >&2 || true
+
+  if [[ -z "$choice" ]]; then
+    echo ""
+    return 0
+  fi
+  if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#folders[@]} )); then
+    echo "${folders[$((choice - 1))]}"
+    return 0
+  fi
+  for f in "${folders[@]}"; do
+    [[ "$choice" == "$f" ]] && { echo "$f"; return 0; }
+  done
+  printf '    %s✗ Folder tidak ditemukan: %s%s\n' "$C_RED" "$choice" "$C_RESET" >&2
+  exit 1
+}
+
+menu_files() {
+  local folder="$1"
+  local files=() choice="" i=1 f
+  while IFS= read -r f; do files+=("$f"); done < <(list_files "$folder")
+
+  printf '\n%s── Pilih file test di %s ──%s\n' "$C_BOLD$C_CYAN" "$folder" "$C_RESET" >&2
+  for f in "${files[@]}"; do
+    printf '  %d) %s%s%s\n' "$i" "$C_GREEN" "$f" "$C_RESET" >&2
+    i=$((i + 1))
+  done
+  printf '  %d) %s%s%s   (semua file)\n' "$i" "$C_GREEN" "*" "$C_RESET" >&2
+  read -rp "Pilihan (nomor, Enter=semua) [semua]: " choice >&2 || true
+
+  if [[ -z "$choice" ]]; then
+    echo ""
+    return 0
+  fi
+  if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#files[@]} )); then
+    echo "${files[$((choice - 1))]}"
+    return 0
+  fi
+  printf '    %s✗ File tidak dikenal: %s%s\n' "$C_RED" "$choice" "$C_RESET" >&2
+  exit 1
+}
+
+# ── resolusi argumen langsung ──────────────────────────────────────────────
+resolve_folder() {
+  local src="$1" arg="$2" options
+  arg="${arg#src/}"
+  if [[ ! -d "$src/$arg" ]] || ! has_tests "$src/$arg"; then
+    options="$(list_folders "$src" | paste -sd ', ' -)"
+    printf '    %s✗ Folder tidak ditemukan: %s — opsi: %s%s\n' "$C_RED" "$arg" "$options" "$C_RESET"
     exit 1
-    ;;
-esac
+  fi
+  echo "$arg"
+}
+
+resolve_file() {
+  local src="$1" folder="$2" arg="$3" base rel
+  arg="${arg#src/}"
+  base="${arg##*/}"
+  rel="${arg%/*}"
+  [[ "$rel" == "$arg" ]] && rel="$folder" || rel="$folder/$rel"
+  if [[ ! -f "$src/$rel/$base" ]]; then
+    printf '    %s✗ File tidak ditemukan: %s%s\n' "$C_RED" "$arg" "$C_RESET"
+    exit 1
+  fi
+  echo "$rel/$base"
+}
+
+# ── resolusi mode ──────────────────────────────────────────────────────────
+ARG_MODE="${1:-}"
+ARG_FOLDER="${2:-}"
+ARG_FILE="${3:-}"
+
+if [[ -n "$ARG_MODE" ]]; then
+  case "$ARG_MODE" in
+    1 | unitest | ui | unit)
+      MODE="unitest"
+      ;;
+    2 | security)
+      MODE="security"
+      ;;
+    3 | all | semua)
+      MODE="all"
+      ;;
+    *)
+      printf '    %s✗ Mode tidak dikenal: %s — gunakan unitest/security/all%s\n' "$C_RED" "$ARG_MODE" "$C_RESET"
+      exit 1
+      ;;
+  esac
+else
+  printf '%s── Pilih jenis test ──%s\n' "$C_BOLD$C_CYAN" "$C_RESET"
+  printf '  1) %sUnit test%s   (92 test UI — audit-vitest)\n' "$C_GREEN" "$C_RESET"
+  printf '  2) %sSecurity%s    (37 test JWT — audit-security, butuh API dev)\n' "$C_GREEN" "$C_RESET"
+  printf '  3) %sSemua%s       (unit + security)\n' "$C_GREEN" "$C_RESET"
+  read -rp "Pilihan (1/2/3, unitest/security/all) [all]: " CHOICE || true
+  echo
+
+  case "${CHOICE:-all}" in
+    1 | unitest | ui | unit)
+      MODE="unitest"
+      ;;
+    2 | security)
+      MODE="security"
+      ;;
+    3 | all | semua)
+      MODE="all"
+      ;;
+    *)
+      printf '    %s✗ Pilihan tidak dikenal: %s — gunakan 1/2/3 atau unitest/security/all%s\n' "$C_RED" "$CHOICE" "$C_RESET"
+      exit 1
+      ;;
+  esac
+fi
 
 if [[ "$MODE" == "security" || "$MODE" == "all" ]] && ! api_running; then
   box_top
@@ -66,15 +211,52 @@ if [[ "$MODE" == "security" || "$MODE" == "all" ]] && ! api_running; then
   echo
 fi
 
+# ── pilihan folder & file (unitest / security) ─────────────────────────────
+TARGET=""
+if [[ "$MODE" == "unitest" || "$MODE" == "security" ]]; then
+  if [[ "$MODE" == "unitest" ]]; then
+    PKG="audit-vitest"; SRC="$ROOT/audit/vitest/src"; LABEL="unitest"
+  else
+    PKG="audit-security"; SRC="$ROOT/audit/security/src"; LABEL="security"
+  fi
+
+  FOLDER=""
+  FILE=""
+  if [[ -n "$ARG_FOLDER" ]]; then
+    FOLDER="$(resolve_folder "$SRC" "$ARG_FOLDER")"
+    [[ -n "$ARG_FILE" ]] && FILE="$(resolve_file "$SRC" "$FOLDER" "$ARG_FILE")"
+  else
+    FOLDER="$(menu_folders "$SRC" "$LABEL")"
+    [[ -n "$FOLDER" ]] && FILE="$(menu_files "$SRC/$FOLDER")"
+  fi
+
+  if [[ -n "$FILE" ]]; then
+    TARGET="src/$FOLDER/${FILE##*/}"
+  elif [[ -n "$FOLDER" ]]; then
+    TARGET="src/$FOLDER"
+  fi
+fi
+
+# ── eksekusi ───────────────────────────────────────────────────────────────
 SECONDS=0
 case "$MODE" in
   unitest)
-    echo "==> Unit test (audit-vitest)"
-    pnpm test:ui
+    if [[ -n "$TARGET" ]]; then
+      echo "==> Unit test (audit-vitest) — target: $TARGET"
+      pnpm --filter @workspace/audit-vitest run test "$TARGET"
+    else
+      echo "==> Unit test (audit-vitest)"
+      pnpm test:ui
+    fi
     ;;
   security)
-    echo "==> Security test (audit-security)"
-    pnpm test:security
+    if [[ -n "$TARGET" ]]; then
+      echo "==> Security test (audit-security) — target: $TARGET"
+      pnpm --filter @workspace/audit-security run test "$TARGET"
+    else
+      echo "==> Security test (audit-security)"
+      pnpm test:security
+    fi
     ;;
   all)
     echo "==> Semua test (unit + security)"

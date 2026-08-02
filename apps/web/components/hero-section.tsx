@@ -56,7 +56,11 @@ const commands = [
   { command: "pnpm format", description: "Prettier — tulis ulang semua file" },
   {
     command: "pnpm test",
-    description: "Tanya pilihan: unitest / security / all",
+    description: "Menu: unitest / security / all — pilih folder & file",
+  },
+  {
+    command: "pnpm test unitest ui",
+    description: "Langsung: semua test di folder ui (tanpa menu)",
   },
   {
     command: "pnpm test:ui",
