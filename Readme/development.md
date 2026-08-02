@@ -158,7 +158,7 @@ pnpm --filter @workspace/db db:studio:pgsql     # Prisma Studio pgsql (opsional)
 ```
 
 - Schema: `packages/db/prisma-pgsql/schema.prisma` (model `User` sama dengan sqlite).
-- Config: `prisma-pgsql.config.ts` (di-ignore git) membaca chain env di atas.
+- Config: `prisma-pgsql.config.ts` (ter-track git, tanpa rahasia — hanya membaca env) membaca chain env di atas. Begitu juga `prisma.config.ts` untuk SQLite: kedua config **harus** ikut ter-commit agar `prisma db push`/`generate` berfungsi setelah clone.
 - Hasil generate: `packages/db/src/generated/pgsql/` (di-ignore git, disalin ke `dist/` saat build).
 - **Auto-switch**: begitu salah satu env pgsql terisi, `apps/api` otomatis memakai PostgreSQL; tanpa env tersebut tetap SQLite. Periksa log API: `DB PostgreSQL Berhasil` / `DB Sqlite Berhasil`.
 - **Prisma Postgres**: `db.prisma.io` = koneksi _direct_ (pas untuk `db push`/Studio); untuk traffic aplikasi produksi gunakan string _pooled_ (`pooled.db.prisma.io`). `@prisma/adapter-pg` adalah adapter resmi untuk Prisma Postgres di Node.js.

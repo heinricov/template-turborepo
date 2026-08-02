@@ -3,6 +3,4 @@ dist/
 .env
 *.db
 *.db-journal
-prisma.config.ts
-prisma-pgsql.config.ts
 src/generated/

@@ -18,30 +18,50 @@ Template monorepo full-stack siap pakai: **Next.js 16**, **NestJS 11**, dan **Vi
 - **Node.js ≥ 20** (direkomendasikan 22+)
 - **pnpm 10** — aktifkan dengan `corepack enable` (versi terpin otomatis sesuai `packageManager` di `package.json`)
 
-### Clone & setup
+### 1. Clone repository
 
 ```bash
 git clone https://github.com/heinricov/template-turborepo.git
 ```
 
+> **Ganti nama proyek?** Folder hasil clone bisa langsung diberi nama sendiri:
+>
+> ```bash
+> git clone https://github.com/heinricov/template-turborepo.git nama-proyek-anda
+> ```
+>
+> Untuk mengubah nama paket di `package.json` dan referensi di dokumentasi, setelah clone jalankan:
+>
+> ```bash
+> pnpm rename nama-proyek-anda
+> ```
+
+### 2. Masuk ke direktori proyek
+
 ```bash
-cd template-turborepo-01
+cd template-turborepo-01        # atau: cd nama-proyek-anda
 ```
 
-pnpm 10.33.4 (jika pnpm belum terpasang)
+### 3. Aktifkan pnpm (jika belum terpasang)
 
 ```bash
 corepack enable
 ```
 
-siapkan .env (JWT_SECRET acak, DATABASE_URL_PGSQL kosong),
-install deps, generate & buat tabel database — aman diulang
+### 4. Jalankan setup otomatis
 
 ```bash
 pnpm bootstrap
 ```
 
-jalankan semua aplikasi
+`pnpm bootstrap` melakukan semuanya sekaligus (aman dijalankan ulang):
+
+1. **Environment files** — membuat `apps/api/.env` (dengan `JWT_SECRET` acak) dan `packages/db/.env` (dengan `DATABASE_URL_PGSQL` kosong). File yang sudah ada tidak ditimpa.
+2. **Install dependencies** — `pnpm install` (reproducible via `pnpm-lock.yaml`).
+3. **Generate Prisma Client** — `db:generate`.
+4. **Setup database SQLite** — `db:push` (membuat `packages/db/prisma/dev.db`).
+
+### 5. Jalankan semua aplikasi
 
 ```bash
 pnpm dev
