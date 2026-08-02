@@ -33,7 +33,7 @@ fi
 echo "  ✓ Node $(node -v) / pnpm $(pnpm -v)"
 
 echo
-echo "==> 1/5 Hapus dokumen internal (Readme/)"
+echo "==> 1/5 Hapus dokumen internal (Readme/) & ganti README.md"
 
 if [[ -d "$ROOT/Readme" ]]; then
   rm -rf "$ROOT/Readme"
@@ -41,6 +41,10 @@ if [[ -d "$ROOT/Readme" ]]; then
 else
   echo "  ✓ Folder Readme/ sudah tidak ada"
 fi
+
+PROJECT_DIR_NAME="$(basename "$ROOT")"
+sed "s/nama-proyek-anda/${PROJECT_DIR_NAME}/g" "$ROOT/scripts/templates/README.md" >"$ROOT/README.md"
+echo "  ✓ README.md diganti versi ringkas (cd ${PROJECT_DIR_NAME})"
 
 echo
 echo "==> 2/5 Environment files"
