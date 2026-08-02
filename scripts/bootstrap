@@ -24,7 +24,7 @@ fi
 if ! command -v pnpm >/dev/null 2>&1; then
   echo "! pnpm belum tersedia — aktifkan lewat Corepack:"
   echo "    corepack enable"
-  echo "  lalu jalankan ulang: pnpm setup"
+  echo "  lalu jalankan ulang: pnpm bootstrap"
   echo
   echo "  (atau: npm i -g pnpm@10)"
   exit 1
@@ -33,7 +33,17 @@ fi
 echo "  ✓ Node $(node -v) / pnpm $(pnpm -v)"
 
 echo
-echo "==> 1/4 Environment files"
+echo "==> 1/5 Hapus dokumen internal (Readme/)"
+
+if [[ -d "$ROOT/Readme" ]]; then
+  rm -rf "$ROOT/Readme"
+  echo "  ✓ Folder Readme/ dihapus (dokumen internal template — tersedia di GitHub repo)"
+else
+  echo "  ✓ Folder Readme/ sudah tidak ada"
+fi
+
+echo
+echo "==> 2/5 Environment files"
 
 if [[ -f "$ROOT/apps/api/.env" ]]; then
   echo "  ✓ apps/api/.env sudah ada (dibiarkan apa adanya)"
@@ -54,19 +64,19 @@ if [[ -f "$ROOT/packages/db/.env" ]]; then
 else
   cp "$ROOT/packages/db/.env.example" "$ROOT/packages/db/.env"
   echo "  ✓ packages/db/.env dibuat dari example — DATABASE_URL_PGSQL kosong (SQLite)"
-  echo "    (opsional PostgreSQL: isi DATABASE_URL_PGSQL — lihat Readme/use.md)"
+  echo "    (opsional PostgreSQL: isi DATABASE_URL_PGSQL — panduan di GitHub repo, folder Readme/)"
 fi
 
 echo
-echo "==> 2/4 Install dependencies"
+echo "==> 3/5 Install dependencies"
 pnpm install
 
 echo
-echo "==> 3/4 Generate Prisma Client"
+echo "==> 4/5 Generate Prisma Client"
 pnpm --filter @workspace/db db:generate
 
 echo
-echo "==> 4/4 Setup database (SQLite)"
+echo "==> 5/5 Setup database (SQLite)"
 pnpm --filter @workspace/db db:push
 
 echo
@@ -81,4 +91,4 @@ echo
 echo "Opsional:"
 echo "    pnpm sqlite seed User   → isi akun contoh (admin / user)"
 echo "    pnpm test               → jalankan semua test"
-echo "    PostgreSQL (Vercel/Prisma Postgres) → panduan di Readme/use.md"
+echo "    PostgreSQL (Vercel/Prisma Postgres) → panduan di GitHub repo (Readme/use.md)"
