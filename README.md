@@ -39,7 +39,7 @@ git clone https://github.com/heinricov/template-turborepo.git
 ### 2. Masuk ke direktori proyek
 
 ```bash
-cd template-turborepo-01        # atau: cd nama-proyek-anda
+cd nama-proyek-anda
 ```
 
 ### 3. Aktifkan pnpm (jika belum terpasang)
