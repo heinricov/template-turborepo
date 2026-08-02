@@ -222,17 +222,17 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 
 ## 📜 Scripts
 
-| Script               | Deskripsi                                                                |
-| -------------------- | ------------------------------------------------------------------------ |
-| `pnpm bootstrap`     | Setup awal pasca-clone (env, install, database) — idempotent             |
-| `pnpm dev`           | Jalankan **semua** app secara bersamaan (web 3000, admin 3001, api 4000) |
-| `pnpm build`         | Build semua workspace (dengan cache Turbo)                               |
-| `pnpm lint`          | ESLint semua workspace                                                   |
-| `pnpm typecheck`     | `tsc --noEmit` semua workspace                                           |
-| `pnpm format`        | Prettier — tulis ulang semua file                                        |
-| `pnpm test`          | Semua test (UI + security)                                               |
-| `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                          |
-| `pnpm test:security` | Hanya `@workspace/audit-security`                                        |
+| Script               | Deskripsi                                                                       |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `pnpm bootstrap`     | Setup awal pasca-clone (env, install, database) — idempotent                    |
+| `pnpm dev`           | Jalankan **semua** app secara bersamaan (web 3000, admin 3001, api 4000)        |
+| `pnpm build`         | Build semua workspace (dengan cache Turbo)                                      |
+| `pnpm lint`          | ESLint semua workspace                                                          |
+| `pnpm typecheck`     | `tsc --noEmit` semua workspace                                                  |
+| `pnpm format`        | Prettier — tulis ulang semua file                                               |
+| `pnpm test`          | Semua test (UI + security)                                                      |
+| `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                                 |
+| `pnpm test:security` | Hanya `@workspace/audit-security`                                               |
 | `pnpm push`          | `git add .` → commit → push + catat ke tabel `commit.md` (type: add/fix/update) |
 
 Script spesifik per app (`next dev`, `nest start`, `vite`, `prisma db push`, dst.) ada di **[`development.md`](development.md)**.

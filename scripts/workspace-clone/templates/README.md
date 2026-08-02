@@ -142,6 +142,6 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 
 ### 🔄 Git & GitHub — `scripts/github/`
 
-| Perintah    | Fungsi                                          |
-| ----------- | ----------------------------------------------- |
+| Perintah    | Fungsi                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
 | `pnpm push` | Satu perintah `git add .` → commit → push — mencatat commit ke tabel `commit.md` (type: add/fix/update) |

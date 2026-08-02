@@ -117,8 +117,8 @@ cat >"$ROOT/commit.md" <<'EOF'
 
 Tabel ini diisi otomatis oleh `pnpm push` — satu baris per commit.
 
-| datetime            | commit | type | file list |
-| ------------------- | ------ | ---- | --------- |
+| datetime | commit | type | file list |
+| -------- | ------ | ---- | --------- |
 EOF
 
 # ── 1/4 Environment files ─────────────────────────────────────────────────
