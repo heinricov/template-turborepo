@@ -98,7 +98,7 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 
 PROJECT_DIR_NAME="$(basename "$ROOT")"
-printf '    %s✔%s %s%s%s  %s·%s  %s%s%s  %s·%s  %starget: %s%s\n' \
+printf '    %s✔%s %sNode %s%s  %s·%s  %spnpm %s%s  %s·%s  %starget: %s%s\n' \
   "$C_GREEN" "$C_RESET" "$C_BOLD" "$(node -v)" "$C_RESET" \
   "$C_DIM" "$C_RESET" "$C_BOLD" "$(pnpm -v)" "$C_RESET" \
   "$C_DIM" "$C_RESET" "$C_DIM" "$PROJECT_DIR_NAME" "$C_RESET"
