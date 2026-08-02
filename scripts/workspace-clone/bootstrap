@@ -14,43 +14,115 @@ gen_secret() {
   fi
 }
 
-echo "==> Setup Template Turborepo"
+# ── Warna (otomatis polos saat bukan TTY / NO_COLOR diset) ────────────────
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'; C_DIM=$'\e[2m'
+  C_CYAN=$'\e[36m'; C_GREEN=$'\e[32m'; C_YELLOW=$'\e[33m'; C_RED=$'\e[31m'
+else
+  C_RESET=""; C_BOLD=""; C_DIM=""; C_CYAN=""; C_GREEN=""; C_YELLOW=""; C_RED=""
+fi
+
+WIDTH=56
+SECONDS=0
+BOOTSTRAP_FAILED=0
+LOG="$(mktemp -t bootstrap.XXXXXXXX 2>/dev/null || true)"
+
+cleanup() {
+  if [[ "$BOOTSTRAP_FAILED" -eq 0 && -n "$LOG" ]]; then
+    rm -f "$LOG"
+  fi
+}
+trap cleanup EXIT
+
+blen() { printf '%s' "$1" | LC_ALL=en_US.UTF-8 wc -m | tr -d ' '; }
+
+box_top()    { printf '%s╔%s╗%s\n' "$C_BOLD$C_CYAN" "$(printf '═%.0s' $(seq 1 "$WIDTH"))" "$C_RESET"; }
+box_bottom() { printf '%s╚%s╝%s\n' "$C_BOLD$C_CYAN" "$(printf '═%.0s' $(seq 1 "$WIDTH"))" "$C_RESET"; }
+box_line() {
+  local text="$1" style="${2:-}"
+  local pad=$(( WIDTH - 4 - $(blen "$text") ))
+  [[ $pad -lt 0 ]] && pad=0
+  printf '║  %s%s%s%*s║\n' "$style" "$text" "$C_RESET" "$pad" ""
+}
+
+error_box() {
+  box_top
+  box_line "$1" "$C_BOLD$C_RED"
+  box_line "$2" "$C_RED"
+  box_bottom
+}
+
+step()     { printf '%s── [%s/%s]%s %s▸ %s%s\n' "$C_CYAN" "$1" "$2" "$C_RESET" "$C_BOLD" "$3" "$C_RESET"; }
+msg_ok()   { printf '    %s✔ %s%s\n' "$C_GREEN" "$*" "$C_RESET"; }
+msg_info() { printf '    %sℹ %s%s\n' "$C_YELLOW" "$*" "$C_RESET"; }
+
+fail() { BOOTSTRAP_FAILED=1; exit 1; }
+
+run_cmd() {
+  local label="$1"; shift
+  printf '    %s⏳ %s …%s\n' "$C_DIM" "$label" "$C_RESET"
+  if [[ -n "$LOG" ]]; then
+    if ! "$@" >"$LOG" 2>&1; then
+      printf '    %s✗ %s gagal.%s\n' "$C_RED" "$label" "$C_RESET"
+      tail -n 20 "$LOG" | sed 's/^/    /'
+      printf '    %sLog lengkap: %s%s\n' "$C_DIM" "$LOG" "$C_RESET"
+      fail
+    fi
+  elif ! "$@"; then
+    printf '    %s✗ %s gagal.%s\n' "$C_RED" "$label" "$C_RESET"
+    fail
+  fi
+  printf '    %s✔ %s%s\n' "$C_GREEN" "$label" "$C_RESET"
+}
+
+# ── Header ────────────────────────────────────────────────────────────────
+box_top
+box_line "⚡ Template Turborepo — Setup Otomatis" "$C_BOLD$C_CYAN"
+box_line "Lingkungan · Dependensi · Database" "$C_DIM"
+box_bottom
 echo
 
+# ── Prasyarat ─────────────────────────────────────────────────────────────
 if ! command -v node >/dev/null 2>&1; then
-  echo "✗ Node.js tidak ditemukan. Install Node.js ≥ 20 dulu (mis. https://nodejs.org)."
+  error_box "✗ Node.js tidak ditemukan" "Install Node.js ≥ 20 dulu — https://nodejs.org"
   exit 1
 fi
 if ! command -v pnpm >/dev/null 2>&1; then
-  echo "! pnpm belum tersedia — aktifkan lewat Corepack:"
-  echo "    corepack enable"
-  echo "  lalu jalankan ulang: pnpm bootstrap"
-  echo
-  echo "  (atau: npm i -g pnpm@10)"
+  box_top
+  box_line "✗ pnpm tidak ditemukan" "$C_BOLD$C_RED"
+  box_line "Aktifkan lewat Corepack:" "$C_RED"
+  box_line "  corepack enable  lalu: pnpm bootstrap" "$C_RED"
+  box_line "atau: npm i -g pnpm@10" "$C_RED"
+  box_bottom
   exit 1
 fi
 
-echo "  ✓ Node $(node -v) / pnpm $(pnpm -v)"
+PROJECT_DIR_NAME="$(basename "$ROOT")"
+printf '    %s✔%s %s%s%s  %s·%s  %s%s%s  %s·%s  %starget: %s%s\n' \
+  "$C_GREEN" "$C_RESET" "$C_BOLD" "$(node -v)" "$C_RESET" \
+  "$C_DIM" "$C_RESET" "$C_BOLD" "$(pnpm -v)" "$C_RESET" \
+  "$C_DIM" "$C_RESET" "$C_DIM" "$PROJECT_DIR_NAME" "$C_RESET"
 
+# ── 1/5 Dokumen template ──────────────────────────────────────────────────
 echo
-echo "==> 1/5 Hapus dokumen internal (Readme/) & ganti README.md"
+step 1 5 "Bersihkan dokumen template"
 
 if [[ -d "$ROOT/Readme" ]]; then
   rm -rf "$ROOT/Readme"
-  echo "  ✓ Folder Readme/ dihapus (dokumen internal template — tersedia di GitHub repo)"
+  msg_ok "Folder Readme/ dihapus (dokumen internal template)"
 else
-  echo "  ✓ Folder Readme/ sudah tidak ada"
+  msg_info "Folder Readme/ sudah tidak ada"
 fi
 
-PROJECT_DIR_NAME="$(basename "$ROOT")"
 sed "s/nama-proyek-anda/${PROJECT_DIR_NAME}/g" "$ROOT/scripts/workspace-clone/templates/README.md" >"$ROOT/README.md"
-echo "  ✓ README.md diganti versi ringkas (cd ${PROJECT_DIR_NAME})"
+msg_ok "README.md ditulis ulang — panduan ringkas (cd ${PROJECT_DIR_NAME})"
 
+# ── 2/5 Environment files ─────────────────────────────────────────────────
 echo
-echo "==> 2/5 Environment files"
+step 2 5 "Environment files"
 
 if [[ -f "$ROOT/apps/api/.env" ]]; then
-  echo "  ✓ apps/api/.env sudah ada (dibiarkan apa adanya)"
+  msg_info "apps/api/.env sudah ada — tidak diubah"
 else
   cp "$ROOT/apps/api/.env.example" "$ROOT/apps/api/.env"
   SECRET="$(gen_secret)"
@@ -60,41 +132,46 @@ else
   else
     printf '\nJWT_SECRET=%s\n' "$SECRET" >>"$ROOT/apps/api/.env"
   fi
-  echo "  ✓ apps/api/.env dibuat dari example — JWT_SECRET di-generate acak"
+  msg_ok "apps/api/.env dibuat — JWT_SECRET di-generate acak"
 fi
 
 if [[ -f "$ROOT/packages/db/.env" ]]; then
-  echo "  ✓ packages/db/.env sudah ada (dibiarkan apa adanya)"
+  msg_info "packages/db/.env sudah ada — tidak diubah"
 else
   cp "$ROOT/packages/db/.env.example" "$ROOT/packages/db/.env"
-  echo "  ✓ packages/db/.env dibuat dari example — DATABASE_URL_PGSQL kosong (SQLite)"
-  echo "    (opsional PostgreSQL: isi DATABASE_URL_PGSQL — panduan di GitHub repo, folder Readme/)"
+  msg_ok "packages/db/.env dibuat — DATABASE_URL_PGSQL kosong (SQLite)"
 fi
 
+# ── 3/5 Install dependencies ───────────────────────────────────────────────
 echo
-echo "==> 3/5 Install dependencies"
-pnpm install
+step 3 5 "Install dependencies"
+run_cmd "Install dependencies (pnpm install)" pnpm --reporter=append-only install
 
+# ── 4/5 Generate Prisma Client & build ─────────────────────────────────────
 echo
-echo "==> 4/5 Generate Prisma Client & build @workspace/db"
-pnpm --filter @workspace/db db:generate
-pnpm --filter @workspace/db db:generate:pgsql
-pnpm --filter @workspace/db build
+step 4 5 "Generate Prisma Client & build"
+run_cmd "Generate Prisma Client (SQLite)" pnpm --filter @workspace/db db:generate
+run_cmd "Generate Prisma Client (PostgreSQL)" pnpm --filter @workspace/db db:generate:pgsql
+run_cmd "Build @workspace/db (dist/)" pnpm --filter @workspace/db build
 
+# ── 5/5 Setup database ─────────────────────────────────────────────────────
 echo
-echo "==> 5/5 Setup database (SQLite)"
-pnpm --filter @workspace/db db:push
+step 5 5 "Setup database (SQLite)"
+run_cmd "Sinkronkan skema ke SQLite (db:push)" pnpm --filter @workspace/db db:push
 
+# ── Selesai ────────────────────────────────────────────────────────────────
 echo
-echo "==> Setup selesai! 🎉"
+box_top
+box_line "✅ Setup selesai 🎉" "$C_BOLD$C_GREEN"
+box_line "Lingkungan siap dalam ${SECONDS}s" "$C_DIM"
+box_bottom
 echo
-echo "Jalankan aplikasi:"
-echo "    pnpm dev"
-echo "      web   → http://localhost:3000"
-echo "      admin → http://localhost:3001"
-echo "      api   → http://localhost:4000"
+printf '  %sJalankan aplikasi:%s  %s$ pnpm dev%s\n' "$C_BOLD" "$C_RESET" "$C_CYAN" "$C_RESET"
+printf '    • web    → %shttp://localhost:3000%s\n' "$C_CYAN" "$C_RESET"
+printf '    • admin  → %shttp://localhost:3001%s\n' "$C_CYAN" "$C_RESET"
+printf '    • api    → %shttp://localhost:4000%s\n' "$C_CYAN" "$C_RESET"
 echo
-echo "Opsional:"
-echo "    pnpm sqlite seed User   → isi akun contoh (admin / user)"
-echo "    pnpm test               → jalankan semua test"
-echo "    PostgreSQL (Vercel/Prisma Postgres) → panduan di GitHub repo (Readme/use.md)"
+printf '  %sOpsional:%s\n' "$C_BOLD" "$C_RESET"
+printf '    • %spnpm sqlite seed User%s  → isi akun contoh (admin / user)\n' "$C_CYAN" "$C_RESET"
+printf '    • %spnpm test%s              → jalankan semua test\n' "$C_CYAN" "$C_RESET"
+printf '    • PostgreSQL             → isi DATABASE_URL_PGSQL (panduan di GitHub repo)\n'

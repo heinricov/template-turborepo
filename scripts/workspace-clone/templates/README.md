@@ -62,6 +62,8 @@ pnpm bootstrap
 4. **Generate Prisma Client & build** — `db:generate` (SQLite) + `db:generate:pgsql` (PostgreSQL), lalu build `@workspace/db` (menghasilkan `dist/` yang dipakai aplikasi & CLI).
 5. **Setup database SQLite** — `db:push` (membuat `packages/db/prisma/dev.db`).
 
+> Output setiap langkah diringkas. Log lengkap disimpan di `/tmp/bootstrap-*`; bila ada yang gagal, 20 baris terakhir log otomatis ditampilkan.
+
 ### 5. Jalankan semua aplikasi
 
 ```bash
