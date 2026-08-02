@@ -105,21 +105,16 @@ printf '    %s✔%s %sNode %s%s  %s·%s  %spnpm %s%s  %s·%s  %starget: %s%s\n' 
 
 # ── 1/5 Dokumen template ──────────────────────────────────────────────────
 echo
-step 1 5 "Bersihkan dokumen template"
-
+# ── Bersihkan dokumen template (diam, tanpa output) ────────────────────────
 if [[ -d "$ROOT/Readme" ]]; then
   rm -rf "$ROOT/Readme"
-  msg_ok "Folder Readme/ dihapus (dokumen internal template)"
-else
-  msg_info "Folder Readme/ sudah tidak ada"
 fi
 
 sed "s/nama-proyek-anda/${PROJECT_DIR_NAME}/g" "$ROOT/scripts/workspace-clone/templates/README.md" >"$ROOT/README.md"
-msg_ok "README.md ditulis ulang — panduan ringkas (cd ${PROJECT_DIR_NAME})"
 
-# ── 2/5 Environment files ─────────────────────────────────────────────────
+# ── 1/4 Environment files ─────────────────────────────────────────────────
 echo
-step 2 5 "Environment files"
+step 1 4 "Environment files"
 
 if [[ -f "$ROOT/apps/api/.env" ]]; then
   msg_info "apps/api/.env sudah ada — tidak diubah"
@@ -142,21 +137,21 @@ else
   msg_ok "packages/db/.env dibuat — DATABASE_URL_PGSQL kosong (SQLite)"
 fi
 
-# ── 3/5 Install dependencies ───────────────────────────────────────────────
+# ── 2/4 Install dependencies ───────────────────────────────────────────────
 echo
-step 3 5 "Install dependencies"
+step 2 4 "Install dependencies"
 run_cmd "Install dependencies (pnpm install)" pnpm --reporter=append-only install
 
-# ── 4/5 Generate Prisma Client & build ─────────────────────────────────────
+# ── 3/4 Generate Prisma Client & build ─────────────────────────────────────
 echo
-step 4 5 "Generate Prisma Client & build"
+step 3 4 "Generate Prisma Client & build"
 run_cmd "Generate Prisma Client (SQLite)" pnpm --filter @workspace/db db:generate
 run_cmd "Generate Prisma Client (PostgreSQL)" pnpm --filter @workspace/db db:generate:pgsql
 run_cmd "Build @workspace/db (dist/)" pnpm --filter @workspace/db build
 
-# ── 5/5 Setup database ─────────────────────────────────────────────────────
+# ── 4/4 Setup database ─────────────────────────────────────────────────────
 echo
-step 5 5 "Setup database (SQLite)"
+step 4 4 "Setup database (SQLite)"
 run_cmd "Sinkronkan skema ke SQLite (db:push)" pnpm --filter @workspace/db db:push
 
 # ── Selesai ────────────────────────────────────────────────────────────────
