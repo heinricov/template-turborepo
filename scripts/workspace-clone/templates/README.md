@@ -143,27 +143,3 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 | Perintah    | Fungsi                                          |
 | ----------- | ----------------------------------------------- |
 | `pnpm push` | Satu perintah untuk `git add .` → commit → push |
-
----
-
-## 📖 Dokumentasi Lengkap
-
-Untuk **penggunaan penuh dan setup detail** (arsitektur, tech stack, struktur repo, aplikasi & endpoint, packages, testing, semua script, environment variables, CLI data, git workflow) baca:
-
-> 📄 **[`Readme/use.md`](Readme/use.md) — Panduan Lengkap Penggunaan & Setup**
-
-| Dokumen                                       | Isi                                                              |
-| --------------------------------------------- | ---------------------------------------------------------------- |
-| [**use.md**](Readme/use.md)                   | **Panduan lengkap penggunaan & setup** (titik awal yang tepat)   |
-| [**architecture.md**](Readme/architecture.md) | Arsitektur, alur data & autentikasi, konvensi workspace          |
-| [**api.md**](Readme/api.md)                   | Referensi API lengkap: endpoint, request/response, contoh `curl` |
-| [**components.md**](Readme/components.md)     | Katalog komponen UI kit + cara memakainya                        |
-| [**development.md**](Readme/development.md)   | Panduan pengembangan: script per app, database, menambah package |
-| [**testing.md**](Readme/testing.md)           | Strategi testing & catatan penting tiap suite                    |
-
----
-
-## 🧑‍💻 Catatan
-
-- **Keamanan (template)**: untuk proyek production, ganti penyimpanan token `localStorage` pada `web`/`admin` dengan cookie `httpOnly` + refresh token, dan gunakan secret yang dirotasi.
-- **Next.js versi khusus**: repo ini memakai Next.js 16 dengan API yang dapat berbeda dari versi lain — baca panduan di `node_modules/next/dist/docs/` sebelum mengubah kode.

@@ -13,8 +13,8 @@
     "test:security": "turbo test --filter=@workspace/audit-security",
     "sqlite": "pnpm --filter @workspace/db sqlite",
     "pgsql": "pnpm --filter @workspace/db pgsql",
-    "bootstrap": "bash scripts/bootstrap",
-    "rename": "bash scripts/rename",
+    "bootstrap": "bash scripts/workspace-clone/bootstrap",
+    "rename": "bash scripts/workspace-clone/rename",
     "push": "bash scripts/github/push"
   },
   "devDependencies": {

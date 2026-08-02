@@ -10,8 +10,8 @@
     "db:push:pgsql": "prisma db push --config prisma-pgsql.config.ts",
     "db:studio": "prisma studio",
     "db:studio:pgsql": "prisma studio --config prisma-pgsql.config.ts",
-    "sqlite": "node ../../scripts/db-ops.js sqlite",
-    "pgsql": "node ../../scripts/db-ops.js pgsql",
+    "sqlite": "node ../../scripts/workspace-db/db-ops.js sqlite",
+    "pgsql": "node ../../scripts/workspace-db/db-ops.js pgsql",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"

@@ -43,7 +43,7 @@ else
 fi
 
 PROJECT_DIR_NAME="$(basename "$ROOT")"
-sed "s/nama-proyek-anda/${PROJECT_DIR_NAME}/g" "$ROOT/scripts/templates/README.md" >"$ROOT/README.md"
+sed "s/nama-proyek-anda/${PROJECT_DIR_NAME}/g" "$ROOT/scripts/workspace-clone/templates/README.md" >"$ROOT/README.md"
 echo "  ✓ README.md diganti versi ringkas (cd ${PROJECT_DIR_NAME})"
 
 echo

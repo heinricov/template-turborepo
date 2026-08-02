@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /* CLI utilitas data untuk @workspace/db
  * Penggunaan (dari root):
- *   node scripts/db-ops.js <sqlite|pgsql> push table [nama-table] [key=value...]
- *   node scripts/db-ops.js <sqlite|pgsql> delete table [nama-table]
- *   node scripts/db-ops.js <sqlite|pgsql> delete
- *   node scripts/db-ops.js <sqlite|pgsql> seed [table] [nama-table]
- *   node scripts/db-ops.js <sqlite|pgsql> tables
+ *   node scripts/workspace-db/db-ops.js <sqlite|pgsql> push table [nama-table] [key=value...]
+ *   node scripts/workspace-db/db-ops.js <sqlite|pgsql> delete table [nama-table]
+ *   node scripts/workspace-db/db-ops.js <sqlite|pgsql> delete
+ *   node scripts/workspace-db/db-ops.js <sqlite|pgsql> seed [table] [nama-table]
+ *   node scripts/workspace-db/db-ops.js <sqlite|pgsql> tables
  * Alias pnpm: pnpm sqlite ... / pnpm pgsql ... (lihat package.json root & packages/db)
  */
 const fs = require("node:fs")
@@ -13,7 +13,7 @@ const path = require("node:path")
 const readline = require("node:readline")
 const { createRequire } = require("node:module")
 
-const ROOT = path.join(__dirname, "..")
+const ROOT = path.join(__dirname, "..", "..")
 const DB_DIR = path.join(ROOT, "packages", "db")
 const dbRequire = createRequire(path.join(DB_DIR, "package.json"))
 
@@ -206,11 +206,11 @@ async function main() {
   if (!["sqlite", "pgsql"].includes(db)) {
     console.log(
       "Penggunaan:\n" +
-        "  node scripts/db-ops.js <sqlite|pgsql> push table [nama] [key=value...]\n" +
-        "  node scripts/db-ops.js <sqlite|pgsql> delete table [nama]\n" +
-        "  node scripts/db-ops.js <sqlite|pgsql> delete\n" +
-        "  node scripts/db-ops.js <sqlite|pgsql> seed [table] [nama]\n" +
-        "  node scripts/db-ops.js <sqlite|pgsql> tables\n" +
+        "  node scripts/workspace-db/db-ops.js <sqlite|pgsql> push table [nama] [key=value...]\n" +
+        "  node scripts/workspace-db/db-ops.js <sqlite|pgsql> delete table [nama]\n" +
+        "  node scripts/workspace-db/db-ops.js <sqlite|pgsql> delete\n" +
+        "  node scripts/workspace-db/db-ops.js <sqlite|pgsql> seed [table] [nama]\n" +
+        "  node scripts/workspace-db/db-ops.js <sqlite|pgsql> tables\n" +
         "Contoh: pnpm sqlite push table users email=a@b.co role=user"
     )
     process.exit(1)

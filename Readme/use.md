@@ -149,9 +149,13 @@ Diagram dan alur data yang lebih dalam di **[`architecture.md`](architecture.md)
 │   └── vitest/     # 🧪 @workspace/audit-vitest — 92 test UI (jsdom)
 ├── config/         # ⚙️ @workspace/config — preset ESLint & tsconfig
 ├── scripts/
-│   ├── db-ops.js      # 🗄️ CLI data: pnpm sqlite / pnpm pgsql (push, delete, seed, tables)
-│   ├── bootstrap      # ⚙️ Setup awal pasca-clone (pnpm bootstrap)
-│   └── github/push    # 🚀 git add + commit + push dalam satu perintah
+│   ├── workspace-clone/    # ⚙️ Setup & tooling pasca-clone
+│   │   ├── bootstrap       #     pnpm bootstrap — setup otomatis (env, install, db)
+│   │   ├── rename          #     pnpm rename <nama> — ganti nama proyek
+│   │   └── templates/      #     Template README.md yang ditulis bootstrap
+│   ├── workspace-db/       # 🗄️ CLI data: pnpm sqlite / pnpm pgsql (push, delete, seed, tables)
+│   │   └── db-ops.js
+│   └── github/push         # 🚀 git add + commit + push dalam satu perintah
 ├── turbo.json      # 🌀 Konfigurasi pipeline Turborepo
 └── pnpm-workspace.yaml
 ```
@@ -252,7 +256,7 @@ Perilakunya:
 
 ## 🗄️ Utilitas Data CLI — `pnpm sqlite` / `pnpm pgsql`
 
-Manipulasi data langsung dari terminal (script: `scripts/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+Manipulasi data langsung dari terminal (script: `scripts/workspace-db/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
 
 | Perintah                                                           | Fungsi                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -268,7 +272,7 @@ Manipulasi data langsung dari terminal (script: `scripts/db-ops.js`). Menulis ke
 Catatan:
 
 - Field `password` otomatis di-hash `bcrypt` (sesuai `apps/api`), jadi user hasil `push`/`seed` bisa langsung login.
-- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/db-ops.js`.
+- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/workspace-db/db-ops.js`.
 - Setelah `delete` (drop semua), schema hilang — restore dengan `db:push` / `db:push:pgsql`.
 - Prasyarat: `@workspace/db` sudah di-build (`pnpm --filter @workspace/db build`).
 

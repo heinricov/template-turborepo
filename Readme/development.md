@@ -167,7 +167,7 @@ pnpm --filter @workspace/db db:studio:pgsql     # Prisma Studio pgsql (opsional)
 
 ### Utilitas Data CLI — `pnpm sqlite` / `pnpm pgsql`
 
-Manipulasi data langsung dari terminal (script: `scripts/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+Manipulasi data langsung dari terminal (script: `scripts/workspace-db/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
 
 | Perintah                                                           | Fungsi                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -183,7 +183,7 @@ Manipulasi data langsung dari terminal (script: `scripts/db-ops.js`). Menulis ke
 Catatan:
 
 - Field `password` otomatis di-hash `bcrypt` (sesuai `apps/api`), jadi user hasil `push`/`seed` bisa langsung login.
-- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/db-ops.js`.
+- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/workspace-db/db-ops.js`.
 - Setelah `delete` (drop semua), schema hilang — restore dengan `db:push` / `db:push:pgsql`.
 - Kedua schema (`prisma/schema.prisma` dan `prisma-pgsql/schema.prisma`) **harus tetap sinkron** — model & kolom diidentifikasi dari schema masing-masing database.
 - Prasyarat: `@workspace/db` sudah di-build (`pnpm --filter @workspace/db build`).
