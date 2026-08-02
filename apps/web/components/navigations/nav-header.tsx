@@ -54,10 +54,6 @@ export const NavHeader = () => {
     router.push("/")
   }
 
-  const visibleMenuItems = auth
-    ? menuItems
-    : menuItems.filter((i) => i.href !== "/profile")
-
   return (
     <header>
       <nav
@@ -75,9 +71,9 @@ export const NavHeader = () => {
                 <span className="text-2xl font-bold">Turborepo</span>
               </Link>
 
-              <div className="flex gap-2">
-                {auth === undefined ? null : auth ? (
-                  <div className="md:hidden">
+              <div className="flex items-center gap-2">
+                <div className="lg:hidden">
+                  {auth === undefined ? null : auth ? (
                     <NavUser
                       user={{
                         name: auth.user.username ?? auth.user.email,
@@ -85,8 +81,30 @@ export const NavHeader = () => {
                       }}
                       onLogout={handleLogout}
                     />
-                  </div>
-                ) : null}
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        nativeButton={false}
+                        render={
+                          <Link href="/auth/login">
+                            <span>Login</span>
+                          </Link>
+                        }
+                      />
+                      <Button
+                        size="sm"
+                        nativeButton={false}
+                        render={
+                          <Link href="/auth/signup">
+                            <span>Sign Up</span>
+                          </Link>
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => setMenuState(!menuState)}
                   aria-label={menuState == true ? "Close Menu" : "Open Menu"}
@@ -105,26 +123,61 @@ export const NavHeader = () => {
               </div>
 
               <div className="max-lg:hidden">
-                <ul className="flex gap-8 text-sm">
-                  {visibleMenuItems.map((item, index) => (
-                    <li key={index}>
-                      <Link
-                        href={item.href}
-                        className="text-muted-foreground hover:text-accent-foreground block duration-150"
-                      >
-                        <span>{item.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex items-center gap-8 text-sm">
+                  <ul className="flex items-center gap-8">
+                    {menuItems.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                        >
+                          <span>{item.name}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-border flex items-center gap-2 border-l pl-6">
+                    {auth === undefined ? null : auth ? (
+                      <NavUser
+                        user={{
+                          name: auth.user.username ?? auth.user.email,
+                          email: auth.user.email,
+                        }}
+                        onLogout={handleLogout}
+                      />
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          nativeButton={false}
+                          render={
+                            <Link href="/auth/login">
+                              <span>Login</span>
+                            </Link>
+                          }
+                        />
+                        <Button
+                          size="sm"
+                          nativeButton={false}
+                          render={
+                            <Link href="/auth/signup">
+                              <span>Sign Up</span>
+                            </Link>
+                          }
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
             <div className="bg-background mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 in-data-[state=active]:block md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none lg:in-data-[state=active]:flex dark:shadow-none dark:lg:bg-transparent">
               <div className="lg:hidden">
                 <ul>
-                  {visibleMenuItems.map((item, index) => (
-                    <li key={index}>
+                  {menuItems.map((item) => (
+                    <li key={item.href}>
                       <Link
                         href={item.href}
                         className="text-foreground block py-3 text-2xl font-medium"
@@ -134,39 +187,6 @@ export const NavHeader = () => {
                     </li>
                   ))}
                 </ul>
-              </div>
-              <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                {auth === undefined ? null : auth ? (
-                  <NavUser
-                    user={{
-                      name: auth.user.username ?? auth.user.email,
-                      email: auth.user.email,
-                    }}
-                    onLogout={handleLogout}
-                  />
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      nativeButton={false}
-                      render={
-                        <Link href="/auth/login">
-                          <span>Login</span>
-                        </Link>
-                      }
-                    />
-                    <Button
-                      size="sm"
-                      nativeButton={false}
-                      render={
-                        <Link href="/auth/signup">
-                          <span>Sign Up</span>
-                        </Link>
-                      }
-                    />
-                  </>
-                )}
               </div>
             </div>
           </div>

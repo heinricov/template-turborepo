@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Ganti nama proyek setelah clone — idempotent.
+# Penggunaan: pnpm rename <nama-proyek>
+# Contoh: pnpm rename my-project
+#
+# Catatan: URL GitHub di hero-section.tsx dan README tidak disentuh —
+# itu menunjuk ke repo asli template.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+ROOT="$PWD"
+
+if [[ $# -ne 1 ]]; then
+  echo "Penggunaan: pnpm rename <nama-proyek>"
+  echo "Contoh: pnpm rename my-project"
+  exit 1
+fi
+
+NAME="$1"
+if [[ ! "$NAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+  echo "✗ Nama hanya boleh berisi huruf, angka, titik, strip, atau underscore."
+  exit 1
+fi
+
+OLD_NAME="template-turborepo-01"
+
+echo "==> Rename proyek: $OLD_NAME → $NAME"
+
+if grep -q "\"name\": \"$OLD_NAME\"" "$ROOT/package.json"; then
+  sed -i.bak "s/\"name\": \"$OLD_NAME\"/\"name\": \"$NAME\"/" "$ROOT/package.json"
+  rm -f "$ROOT/package.json.bak"
+  echo "  ✓ package.json name → $NAME"
+else
+  echo "  - package.json sudah bukan '$OLD_NAME' (tidak diubah)"
+fi
+
+for f in "$ROOT/README.md" "$ROOT/Readme/use.md"; do
+  if grep -q "$OLD_NAME" "$f"; then
+    sed -i.bak "s/$OLD_NAME/$NAME/g" "$f"
+    rm -f "$f.bak"
+    echo "  ✓ ${f#"$ROOT"/} diperbarui"
+  fi
+done
+
+echo
+echo "Selesai. Nama proyek sekarang: $NAME"
+echo "Jika repo Anda berbeda dari template, ganti juga URL git clone di README.md."

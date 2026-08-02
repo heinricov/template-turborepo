@@ -14,6 +14,7 @@
     "sqlite": "pnpm --filter @workspace/db sqlite",
     "pgsql": "pnpm --filter @workspace/db pgsql",
     "bootstrap": "bash scripts/bootstrap",
+    "rename": "bash scripts/rename",
     "push": "bash scripts/github/push"
   },
   "devDependencies": {
