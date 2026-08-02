@@ -99,9 +99,18 @@ API otomatis beralih ke PostgreSQL saat salah satu env di atas terisi — lokal 
 
 ## 🧰 Perintah Berdasarkan Peruntukan
 
-Semua script disimpan di `scripts/` sesuai peruntukannya: **`workspace-clone/`** (setup & tooling pasca-clone), **`workspace-db/`** (urusan database), dan **`workspace-test/`** (menjalankan test).
+Semua script lokal digabung dalam **satu CLI: `morea`** (Node + Commander) di `scripts/cli/` — peruntukan (definisi perintah) di `commands/` terpisah dari implementasi di `lib/`:
 
-### 🚀 Setup & Clone — `scripts/workspace-clone/`
+```
+scripts/cli/
+├── index.js            # setup tunggal (Commander) + banner
+├── commands/           # peruntukan: definisi perintah & help (test, unitest, push, …)
+└── lib/                # implementasi perintah (test-runner, unitest-generator, …)
+```
+
+Dengan `pnpm morea <perintah> --help` semua penggunaan & contoh tampil. `pnpm test`/`push`/`bootstrap`/`rename`/`sqlite`/`pgsql` di bawah adalah alias ke `morea`.
+
+### 🚀 Setup & Clone — `pnpm morea bootstrap` / `rename`
 
 | Perintah             | Fungsi                                                                                                                                 |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -109,7 +118,7 @@ Semua script disimpan di `scripts/` sesuai peruntukannya: **`workspace-clone/`**
 | `pnpm bootstrap`     | Setup otomatis pasca-clone: hapus `Readme/`, tulis README ringkas, buat env, install deps, generate Prisma, setup SQLite. Aman diulang |
 | `pnpm rename <nama>` | Ganti nama paket di `package.json` + referensi `cd` di dokumentasi (mis. `pnpm rename my-app`)                                         |
 
-### 🗄️ Database — `scripts/workspace-db/`
+### 🗄️ Database — `pnpm morea db`
 
 | Perintah                                        | Fungsi                                                     |
 | ----------------------------------------------- | ---------------------------------------------------------- |
@@ -141,9 +150,10 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 | `pnpm test`          | Menu pilihan: unitest / security / all (folder & file) |
 | `pnpm test:ui`       | Test UI saja (Vitest — 102 test)                       |
 | `pnpm test:security` | Test security JWT saja (37 test)                       |
+| `pnpm morea`         | CLI lokal: banner + daftar semua perintah              |
 | `pnpm unitest create`| Generator unit test utk `@workspace/shadcn` (menu folder & file) |
 
-### 🔄 Git & GitHub — `scripts/github/`
+### 🔄 Git & GitHub — `pnpm morea push`
 
 | Perintah    | Fungsi                                                                                                  |
 | ----------- | ------------------------------------------------------------------------------------------------------- |

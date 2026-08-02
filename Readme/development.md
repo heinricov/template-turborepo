@@ -49,12 +49,13 @@ pnpm dev                                  # web:3000 · admin:3001 · api:4000
 
 Contoh pola umum untuk package lain (`pnpm --filter <nama> <script>`), atau sekaligus dari root dengan Turbo: `pnpm lint` / `pnpm typecheck` / `pnpm build`.
 
-### Git Workflow — `pnpm push`
+### Git Workflow — `pnpm morea push`
 
-Script `scripts/github/push` menggabungkan `git add .` → `git commit` → `git push` dalam satu perintah:
+Perintah `push` pada CLI lokal `morea` (`scripts/cli/`) menggabungkan `git add .` → `git commit` → `git push` dalam satu perintah:
 
 ```bash
-pnpm push        # atau: ./scripts/github/push
+pnpm push                        # interaktif
+pnpm morea push -m "pesan" -t fix  # langsung tanpa prompt
 ```
 
 - Bertanya `Commit message (Enter untuk default):` — jika kosong, dipakai `commit-<datetime saat push>` (mis. `commit-2026-08-01 15:11:27`).
@@ -168,7 +169,7 @@ pnpm --filter @workspace/db db:studio:pgsql     # Prisma Studio pgsql (opsional)
 
 ### Utilitas Data CLI — `pnpm sqlite` / `pnpm pgsql`
 
-Manipulasi data langsung dari terminal (script: `scripts/workspace-db/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+Manipulasi data langsung dari terminal (perintah `db` pada CLI `morea` — implementasi di `scripts/cli/lib/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
 
 | Perintah                                                           | Fungsi                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -184,7 +185,7 @@ Manipulasi data langsung dari terminal (script: `scripts/workspace-db/db-ops.js`
 Catatan:
 
 - Field `password` otomatis di-hash `bcrypt` (sesuai `apps/api`), jadi user hasil `push`/`seed` bisa langsung login.
-- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/workspace-db/db-ops.js`.
+- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/cli/lib/db-ops.js`.
 - Setelah `delete` (drop semua), schema hilang — restore dengan `db:push` / `db:push:pgsql`.
 - Kedua schema (`prisma/schema.prisma` dan `prisma-pgsql/schema.prisma`) **harus tetap sinkron** — model & kolom diidentifikasi dari schema masing-masing database.
 - Prasyarat: `@workspace/db` sudah di-build (`pnpm --filter @workspace/db build`).

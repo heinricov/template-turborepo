@@ -3,6 +3,7 @@ packages:
   - "packages/*"
   - "config"
   - "audit/*"
+  - "scripts/*"
 
 allowBuilds:
   sharp: true

@@ -8,15 +8,16 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
-    "test": "bash scripts/workspace-test/test",
-  "unitest": "bash scripts/workspace-test/unitest",
+    "morea": "node scripts/cli/index.js",
+    "test": "pnpm morea test",
+    "unitest": "pnpm morea unitest",
     "test:ui": "turbo test --filter=@workspace/audit-vitest",
     "test:security": "turbo test --filter=@workspace/audit-security",
-    "sqlite": "pnpm --filter @workspace/db sqlite",
-    "pgsql": "pnpm --filter @workspace/db pgsql",
-    "bootstrap": "bash scripts/workspace-clone/bootstrap",
-    "rename": "bash scripts/workspace-clone/rename",
-    "push": "bash scripts/github/push"
+    "sqlite": "pnpm morea db sqlite",
+    "pgsql": "pnpm morea db pgsql",
+    "bootstrap": "pnpm morea bootstrap",
+    "rename": "pnpm morea rename",
+    "push": "pnpm morea push"
   },
   "devDependencies": {
     "@workspace/config": "workspace:*",

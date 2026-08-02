@@ -1,0 +1,23 @@
+{
+  "name": "morea-cli",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CLI lokal untuk project Turborepo ini (hanya lokal, tidak dipublish)",
+  "bin": {
+    "morea": "./index.js"
+  },
+  "scripts": {
+    "format": "prettier --write \"**/*.js\""
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.1",
+    "boxen": "^8.0.1",
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "ora": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

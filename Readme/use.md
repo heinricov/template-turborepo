@@ -149,14 +149,14 @@ Diagram dan alur data yang lebih dalam di **[`architecture.md`](architecture.md)
 │   └── vitest/     # 🧪 @workspace/audit-vitest — 102 test UI (jsdom)
 ├── config/         # ⚙️ @workspace/config — preset ESLint & tsconfig
 ├── scripts/
-│   ├── workspace-clone/    # ⚙️ Setup & tooling pasca-clone
-│   │   ├── bootstrap       #     pnpm bootstrap — setup otomatis (env, install, db)
-│   │   ├── rename          #     pnpm rename <nama> — ganti nama proyek
-│   │   └── templates/      #     Template README.md yang ditulis bootstrap
-│   ├── workspace-db/       # 🗄️ CLI data: pnpm sqlite / pnpm pgsql (push, delete, seed, tables)
-│   │   └── db-ops.js
-│   ├── workspace-test/     # 🧪 pnpm test — interaktif (unitest / security / all)
-│   └── github/push         # 🚀 git add + commit + push + catat ke commit.md
+│   └── cli/                 # ⚡ morea-cli — satu CLI lokal (Commander)
+│       ├── index.js         #     setup tunggal + banner
+│       ├── commands/        #     peruntukan: definisi perintah & help
+│       │   └── test.js · unitest.js · push.js · bootstrap.js · rename.js · db.js
+│       ├── lib/             #     implementasi perintah
+│       │   └── test-runner.js · unitest-generator.js · push.js · bootstrap.js
+│       │       · rename.js · db-ops.js · ui.js (chalk/boxen/clack/ora)
+│       └── package.json     #     private: true — hanya untuk project ini
 ├── commit.md       # 📝 Catatan commit otomatis (datetime, commit, type, file list)
 ├── turbo.json      # 🌀 Konfigurasi pipeline Turborepo
 └── pnpm-workspace.yaml
@@ -210,15 +210,15 @@ Katalog komponen dan contoh penggunaannya di **[`components.md`](components.md)*
 | `@workspace/audit-security` | Unit JWT + integrasi | Node (server dev :4000) | **37 test** (21 unit + 16 integrasi) |
 
 ```bash
-pnpm test               # menu: unitest / security / all → pilih folder & file
-pnpm test unitest ui    # langsung folder ui (tanpa menu)
-pnpm test security unit # langsung folder unit (security)
+pnpm morea test               # menu: unitest / security / all → pilih folder & file
+pnpm morea test unitest ui    # langsung folder ui (tanpa menu)
+pnpm morea test security unit # langsung folder unit (security)
 pnpm test:ui            # hanya audit-vitest (102 test)
 pnpm test:security      # hanya audit-security (37 test)
 
 # Generator skeleton unit test untuk @workspace/shadcn:
-pnpm unitest create            # menu pilih folder & file
-pnpm unitest create ui accordion.tsx  # langsung buat test
+pnpm morea unitest create            # menu pilih folder & file
+pnpm morea unitest create ui accordion.tsx  # langsung buat test
 ```
 
 > ⚠️ **Catatan**: test integrasi `audit-security` berkomunikasi langsung dengan API di `http://localhost:4000`. Jalankan `pnpm dev` terlebih dahulu — jika server tidak aktif, test **sengaja gagal dengan pesan yang jelas**, bukan diam-diam di-skip.
@@ -231,25 +231,28 @@ Strategi dan detail di **[`testing.md`](testing.md)**.
 
 | Script               | Deskripsi                                                                       |
 | -------------------- | ------------------------------------------------------------------------------- |
-| `pnpm bootstrap`     | Setup awal pasca-clone (env, install, database) — idempotent                    |
-| `pnpm dev`           | Jalankan **semua** app secara bersamaan (web 3000, admin 3001, api 4000)        |
-| `pnpm build`         | Build semua workspace (dengan cache Turbo)                                      |
-| `pnpm lint`          | ESLint semua workspace                                                          |
-| `pnpm typecheck`     | `tsc --noEmit` semua workspace                                                  |
-| `pnpm format`        | Prettier — tulis ulang semua file                                               |
-| `pnpm test`          | Interaktif — unitest / security / all, bisa pilih folder & file                 |
-| `pnpm test:ui`       | Hanya `@workspace/audit-vitest`                                                 |
-| `pnpm test:security` | Hanya `@workspace/audit-security`                                               |
-| `pnpm push`          | `git add .` → commit → push + catat ke tabel `commit.md` (type: add/fix/update) |
+| `pnpm morea`        | CLI lokal (Commander) — banner + semua perintah (test, unitest, push, …) |
+| `pnpm morea db`     | Utilitas data: `sqlite`/`pgsql` + tables/push/delete/seed                |
+| `pnpm bootstrap`    | Setup awal pasca-clone (env, install, database) — idempotent             |
+| `pnpm dev`          | Jalankan **semua** app secara bersamaan (web 3000, admin 3001, api 4000) |
+| `pnpm build`        | Build semua workspace (dengan cache Turbo)                               |
+| `pnpm lint`         | ESLint semua workspace                                                   |
+| `pnpm typecheck`    | `tsc --noEmit` semua workspace                                           |
+| `pnpm format`       | Prettier — tulis ulang semua file                                        |
+| `pnpm test`         | Interaktif — unitest / security / all, bisa pilih folder & file          |
+| `pnpm test:ui`      | Hanya `@workspace/audit-vitest`                                          |
+| `pnpm test:security`| Hanya `@workspace/audit-security`                                        |
+| `pnpm push`         | `git add .` → commit → push + catat ke tabel `commit.md` (type: add/fix/update) |
 
 Script spesifik per app (`next dev`, `nest start`, `vite`, `prisma db push`, dst.) ada di **[`development.md`](development.md)**.
 
-### 🚀 Git Workflow — `pnpm push`
+### 🚀 Git Workflow — `pnpm morea push`
 
-Alias untuk `scripts/github/push` — satu perintah untuk `git add .`, commit, dan push. Setiap push juga **mencatat commit ke tabel di `commit.md`** (kolom: `datetime`, `commit`, `type`, `file list`):
+Alias untuk CLI lokal `morea` (`scripts/cli/`) — satu perintah untuk `git add .`, commit, dan push. Setiap push juga **mencatat commit ke tabel di `commit.md`** (kolom: `datetime`, `commit`, `type`, `file list`):
 
 ```bash
-pnpm push
+pnpm push                              # interaktif (prompt pesan & tipe)
+pnpm morea push -m "fix: typo" -t fix  # langsung, tanpa prompt
 ```
 
 Perilakunya:
@@ -262,9 +265,9 @@ Perilakunya:
 
 ---
 
-## 🗄️ Utilitas Data CLI — `pnpm sqlite` / `pnpm pgsql`
+## 🗄️ Utilitas Data CLI — `pnpm morea db sqlite` / `pgsql`
 
-Manipulasi data langsung dari terminal (script: `scripts/workspace-db/db-ops.js`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
+Manipulasi data langsung dari terminal (perintah `db` pada CLI `morea`). Menulis ke SQLite lokal (`dev.db`) atau PostgreSQL (`packages/db/.env` → `DATABASE_URL_PGSQL`). Nama tabel dikenali dari model **dan** nama tabel database (`users`/`Users`/`User` → model `User`).
 
 | Perintah                                                           | Fungsi                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -280,7 +283,7 @@ Manipulasi data langsung dari terminal (script: `scripts/workspace-db/db-ops.js`
 Catatan:
 
 - Field `password` otomatis di-hash `bcrypt` (sesuai `apps/api`), jadi user hasil `push`/`seed` bisa langsung login.
-- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/workspace-db/db-ops.js`.
+- Data seed (tabel `User`): `admin`/`admin@admin.com`/`admin1234` (role `admin`) dan `user`/`user@user.com`/`user1234` (role `user`) — definisi di `SEEDS` pada `scripts/cli/lib/db-ops.js`.
 - Setelah `delete` (drop semua), schema hilang — restore dengan `db:push` / `db:push:pgsql`.
 - Prasyarat: `@workspace/db` sudah di-build (`pnpm --filter @workspace/db build`).
 
