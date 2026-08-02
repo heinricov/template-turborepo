@@ -3,7 +3,7 @@
 # Penggunaan: pnpm bootstrap
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 ROOT="$PWD"
 
 gen_secret() {

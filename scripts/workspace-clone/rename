@@ -7,7 +7,7 @@
 # itu menunjuk ke repo asli template.
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 ROOT="$PWD"
 
 if [[ $# -ne 1 ]]; then
