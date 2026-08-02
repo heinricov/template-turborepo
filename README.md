@@ -59,7 +59,7 @@ pnpm bootstrap
 1. **Bersihkan dokumen template** — menghapus folder `Readme/` internal dan menulis `README.md` versi ringkas ini.
 2. **Environment files** — membuat `apps/api/.env` (dengan `JWT_SECRET` acak) dan `packages/db/.env` (dengan `DATABASE_URL_PGSQL` kosong). File yang sudah ada tidak ditimpa.
 3. **Install dependencies** — `pnpm install` (reproducible via `pnpm-lock.yaml`).
-4. **Generate Prisma Client** — `db:generate`.
+4. **Generate Prisma Client & build** — `db:generate` (SQLite) + `db:generate:pgsql` (PostgreSQL), lalu build `@workspace/db` (menghasilkan `dist/` yang dipakai aplikasi & CLI).
 5. **Setup database SQLite** — `db:push` (membuat `packages/db/prisma/dev.db`).
 
 ### 5. Jalankan semua aplikasi

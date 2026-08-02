@@ -76,8 +76,10 @@ echo "==> 3/5 Install dependencies"
 pnpm install
 
 echo
-echo "==> 4/5 Generate Prisma Client"
+echo "==> 4/5 Generate Prisma Client & build @workspace/db"
 pnpm --filter @workspace/db db:generate
+pnpm --filter @workspace/db db:generate:pgsql
+pnpm --filter @workspace/db build
 
 echo
 echo "==> 5/5 Setup database (SQLite)"
