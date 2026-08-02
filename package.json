@@ -9,6 +9,7 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck",
     "test": "bash scripts/workspace-test/test",
+  "unitest": "bash scripts/workspace-test/unitest",
     "test:ui": "turbo test --filter=@workspace/audit-vitest",
     "test:security": "turbo test --filter=@workspace/audit-security",
     "sqlite": "pnpm --filter @workspace/db sqlite",

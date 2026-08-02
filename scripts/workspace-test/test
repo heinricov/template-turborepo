@@ -174,7 +174,7 @@ if [[ -n "$ARG_MODE" ]]; then
   esac
 else
   printf '%s── Pilih jenis test ──%s\n' "$C_BOLD$C_CYAN" "$C_RESET"
-  printf '  1) %sUnit test%s   (92 test UI — audit-vitest)\n' "$C_GREEN" "$C_RESET"
+  printf '  1) %sUnit test%s   (102 test UI — audit-vitest)\n' "$C_GREEN" "$C_RESET"
   printf '  2) %sSecurity%s    (37 test JWT — audit-security, butuh API dev)\n' "$C_GREEN" "$C_RESET"
   printf '  3) %sSemua%s       (unit + security)\n' "$C_GREEN" "$C_RESET"
   read -rp "Pilihan (1/2/3, unitest/security/all) [all]: " CHOICE || true

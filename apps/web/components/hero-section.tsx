@@ -71,6 +71,11 @@ const commands = [
     description: "Hanya test @workspace/audit-security",
   },
   {
+    command: "pnpm unitest create ui accordion.tsx",
+    description:
+      "Generator skeleton unit test @workspace/shadcn (menu: tanpa argumen)",
+  },
+  {
     command: "pnpm sqlite seed User",
     description: "Isi akun contoh admin & user (password di-hash bcrypt)",
   },

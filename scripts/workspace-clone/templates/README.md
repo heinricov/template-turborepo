@@ -139,8 +139,9 @@ Sub-perintah CLI data (sama untuk `sqlite` dan `pgsql`; `pnpm sqlite` di bawah �
 | `pnpm typecheck`     | TypeScript typecheck                                   |
 | `pnpm format`        | Format kode dengan Prettier                            |
 | `pnpm test`          | Menu pilihan: unitest / security / all (folder & file) |
-| `pnpm test:ui`       | Test UI saja (Vitest — 92 test)                        |
+| `pnpm test:ui`       | Test UI saja (Vitest — 102 test)                       |
 | `pnpm test:security` | Test security JWT saja (37 test)                       |
+| `pnpm unitest create`| Generator unit test utk `@workspace/shadcn` (menu folder & file) |
 
 ### 🔄 Git & GitHub — `scripts/github/`
 

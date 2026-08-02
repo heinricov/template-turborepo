@@ -146,7 +146,7 @@ Diagram dan alur data yang lebih dalam di **[`architecture.md`](architecture.md)
 │   └── validation/ # ✅ @workspace/validation — schema Zod bersama
 ├── audit/
 │   ├── security/   # 🛡️ @workspace/audit-security — 37 test JWT + integrasi
-│   └── vitest/     # 🧪 @workspace/audit-vitest — 92 test UI (jsdom)
+│   └── vitest/     # 🧪 @workspace/audit-vitest — 102 test UI (jsdom)
 ├── config/         # ⚙️ @workspace/config — preset ESLint & tsconfig
 ├── scripts/
 │   ├── workspace-clone/    # ⚙️ Setup & tooling pasca-clone
@@ -206,15 +206,19 @@ Katalog komponen dan contoh penggunaannya di **[`components.md`](components.md)*
 
 | Package                     | Jenis                | Lingkungan              | Jumlah                               |
 | --------------------------- | -------------------- | ----------------------- | ------------------------------------ |
-| `@workspace/audit-vitest`   | Unit UI + lib        | jsdom + Testing Library | **92 test / 28 file**                |
+| `@workspace/audit-vitest`   | Unit UI + lib        | jsdom + Testing Library | **102 test / 32 file**                |
 | `@workspace/audit-security` | Unit JWT + integrasi | Node (server dev :4000) | **37 test** (21 unit + 16 integrasi) |
 
 ```bash
 pnpm test               # menu: unitest / security / all → pilih folder & file
 pnpm test unitest ui    # langsung folder ui (tanpa menu)
 pnpm test security unit # langsung folder unit (security)
-pnpm test:ui            # hanya audit-vitest (92 test)
+pnpm test:ui            # hanya audit-vitest (102 test)
 pnpm test:security      # hanya audit-security (37 test)
+
+# Generator skeleton unit test untuk @workspace/shadcn:
+pnpm unitest create            # menu pilih folder & file
+pnpm unitest create ui accordion.tsx  # langsung buat test
 ```
 
 > ⚠️ **Catatan**: test integrasi `audit-security` berkomunikasi langsung dengan API di `http://localhost:4000`. Jalankan `pnpm dev` terlebih dahulu — jika server tidak aktif, test **sengaja gagal dengan pesan yang jelas**, bukan diam-diam di-skip.

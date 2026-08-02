@@ -1,0 +1,425 @@
+#!/usr/bin/env bash
+# Generator unit test untuk package @workspace/shadcn.
+# Test dibuat di audit/vitest/src/<folder-asal>/ mengikuti struktur packages/shadcn/src/.
+# Penggunaan:
+#   pnpm unitest create                  → menu pilih folder & file
+#   pnpm unitest create ui               → pilih file di folder ui
+#   pnpm unitest create ui accordion.tsx → buat test langsung
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+ROOT="$PWD"
+SRC="$ROOT/packages/shadcn/src"
+DEST="$ROOT/audit/vitest/src"
+
+# ── Warna (otomatis polos saat bukan TTY / NO_COLOR diset) ────────────────
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'; C_DIM=$'\e[2m'
+  C_CYAN=$'\e[36m'; C_GREEN=$'\e[32m'; C_YELLOW=$'\e[33m'; C_RED=$'\e[31m'
+else
+  C_RESET=""; C_BOLD=""; C_DIM=""; C_CYAN=""; C_GREEN=""; C_YELLOW=""; C_RED=""
+fi
+
+# ── utilitas ───────────────────────────────────────────────────────────────
+list_dirs() {
+  local d rel has f
+  while IFS= read -r d; do
+    [[ -d "$d" ]] || continue
+    rel="${d#"$SRC"/}"
+    [[ "$rel" == "styles"* ]] && continue
+    has=0
+    for f in "$d"/*.ts "$d"/*.tsx; do
+      if [[ -f "$f" && "$(basename "$f")" != "index.ts" ]]; then has=1; break; fi
+    done
+    (( has )) && echo "$rel"
+  done < <(find "$SRC" -type d | sort)
+}
+
+list_files() {
+  local dir="$1" f base
+  for f in "$dir"/*.ts "$dir"/*.tsx; do
+    [[ -f "$f" ]] || continue
+    base="$(basename "$f")"
+    [[ "$base" == "index.ts" ]] && continue
+    echo "$base"
+  done
+}
+
+test_exists() {
+  local rel="$1" base="$2" ext="$3"
+  [[ -f "$DEST/$rel/${base%.*}.test.$ext" ]]
+}
+
+import_path() {
+  local rel="$1"
+  case "$rel" in
+    components/data-form | components/data-table)
+      echo "@workspace/shadcn/$rel"
+      ;;
+    *)
+      echo "@workspace/shadcn/$rel/${BASE}"
+      ;;
+  esac
+}
+
+is_all_upper() { [[ "$1" =~ ^[A-Z0-9_]+$ ]]; }
+
+# ── parsing sumber: komponen, data-slot, event, props wajib ───────────────
+parse_source() {
+  awk '
+    /^(export[[:space:]]+default[[:space:]]+|export[[:space:]]+)?(function|const)[[:space:]]/ {
+      inSig = 0
+      if (match($0, /(function|const)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*/)) {
+        n = substr($0, RSTART, RLENGTH)
+        sub(/^.*[[:space:]]/, "", n)
+        cur = n
+        print "C" n
+      }
+      if ($0 ~ /\(\{/) { inSig = 1; sig = $0 "\n" }
+      next
+    }
+    inSig {
+      if ($0 ~ /^[[:space:]]*}[[:space:]]*:[[:space:]]*\{[[:space:]]*$/) { sig = sig $0 "\n"; next }
+      sig = sig $0 "\n"
+      if ($0 ~ /data-slot="/) print "S" cur "\t" $0
+      if ($0 ~ /^[[:space:]]*}[[:space:]]*\)?[[:space:]]*(\{|=>|:[[:space:]]|$)/) {
+        if (sig ~ /\bonClick|\bonChange/) print "E" cur
+        gsub(/\n/, " ", sig)
+        print "P" cur "\t" sig
+        inSig = 0
+      }
+      next
+    }
+    /data-slot="/ { if (cur != "") print "S" cur "\t" $0 }
+  ' "$1"
+}
+
+# ── menu (stdout = hasil, menu ke stderr) ─────────────────────────────────
+menu_dirs() {
+  local dirs=() choice="" i=1 d
+  while IFS= read -r d; do dirs+=("$d"); done < <(list_dirs)
+
+  printf '\n%s── Pilih folder sumber (packages/shadcn/src) ──%s\n' "$C_BOLD$C_CYAN" "$C_RESET" >&2
+  for d in "${dirs[@]}"; do
+    printf '  %d) %s%s%s   (%d file)\n' "$i" "$C_GREEN" "$d" "$C_RESET" "$(list_files "$SRC/$d" | wc -l | tr -d ' ')" >&2
+    i=$((i + 1))
+  done
+  read -rp "Pilihan (nomor/nama folder): " choice >&2 || true
+
+  if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#dirs[@]} )); then
+    echo "${dirs[$((choice - 1))]}"
+    return 0
+  fi
+  for d in "${dirs[@]}"; do
+    [[ "$choice" == "$d" ]] && { echo "$d"; return 0; }
+  done
+  printf '    %s✗ Folder tidak ditemukan: %s%s\n' "$C_RED" "$choice" "$C_RESET" >&2
+  exit 1
+}
+
+menu_files() {
+  local dir="$1"
+  local files=() choice="" i=1 f ext
+  while IFS= read -r f; do files+=("$f"); done < <(list_files "$SRC/$dir")
+
+  printf '\n%s── Pilih file di %s ──%s\n' "$C_BOLD$C_CYAN" "$dir" "$C_RESET" >&2
+  for f in "${files[@]}"; do
+    ext="${f##*.}"
+    if test_exists "$dir" "$f" "$ext"; then
+      printf '  %d) %s%s%s   (✓ sudah ada test)\n' "$i" "$C_GREEN" "$f" "$C_RESET" >&2
+    else
+      printf '  %d) %s%s%s\n' "$i" "$C_GREEN" "$f" "$C_RESET" >&2
+    fi
+    i=$((i + 1))
+  done
+  read -rp "Pilihan (nomor/nama file): " choice >&2 || true
+
+  if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#files[@]} )); then
+    echo "${files[$((choice - 1))]}"
+    return 0
+  fi
+  for f in "${files[@]}"; do
+    [[ "$choice" == "$f" || "$choice" == "${f%.*}" ]] && { echo "$f"; return 0; }
+  done
+  printf '    %s✗ File tidak ditemukan: %s%s\n' "$C_RED" "$choice" "$C_RESET" >&2
+  exit 1
+}
+
+# ── resolusi argumen langsung ─────────────────────────────────────────────
+resolve_dir() {
+  local arg="$1"
+  arg="${arg#src/}"
+  [[ -n "$arg" && -d "$SRC/$arg" ]] || {
+    printf '    %s✗ Folder tidak ditemukan: %s — opsi: %s%s\n' "$C_RED" "$arg" "$(list_dirs | paste -sd ', ' -)" "$C_RESET"
+    exit 1
+  }
+  echo "$arg"
+}
+
+resolve_file() {
+  local dir="$1" arg="$2" base
+  arg="${arg#src/}"
+  [[ "$arg" != *"*"* ]] || {
+    printf '    %s✗ Wildcard tidak didukung: %s%s\n' "$C_RED" "$arg" "$C_RESET"
+    exit 1
+  }
+  base="${arg##*/}"
+  [[ -f "$SRC/$dir/$base" ]] && { echo "$base"; return 0; }
+  [[ -f "$SRC/$dir/$base.ts" ]] && { echo "$base.ts"; return 0; }
+  [[ -f "$SRC/$dir/$base.tsx" ]] && { echo "$base.tsx"; return 0; }
+  printf '    %s✗ File tidak ditemukan di %s: %s%s\n' "$C_RED" "$dir" "$arg" "$C_RESET"
+  exit 1
+}
+
+# ── main ──────────────────────────────────────────────────────────────────
+if [[ "${1:-}" != "create" ]]; then
+  printf '%s── Penggunaan pnpm unitest ──%s\n' "$C_BOLD$C_CYAN" "$C_RESET"
+  printf '  pnpm unitest create                    → menu pilih folder & file\n'
+  printf '  pnpm unitest create ui                 → pilih file di folder ui\n'
+  printf '  pnpm unitest create ui accordion.tsx   → buat test langsung\n'
+  exit 0
+fi
+
+DIR_ARG="${2:-}"
+FILE_ARG="${3:-}"
+
+if [[ -n "$FILE_ARG" && "$FILE_ARG" == */* ]]; then
+  DIR_ARG="${FILE_ARG%/*}"
+  FILE_ARG="${FILE_ARG##*/}"
+fi
+
+if [[ -n "$DIR_ARG" ]]; then
+  DIR="$(resolve_dir "$DIR_ARG")"
+else
+  DIR="$(menu_dirs)"
+fi
+
+if [[ -n "$FILE_ARG" ]]; then
+  FILE="$(resolve_file "$DIR" "$FILE_ARG")"
+else
+  FILE="$(menu_files "$DIR")"
+fi
+
+BASE="${FILE%.*}"
+EXT="${FILE##*.}"
+OUT="$DEST/$DIR/$BASE.test.$EXT"
+
+if test_exists "$DIR" "$FILE" "$EXT"; then
+  read -rp "Test sudah ada: ${OUT#"$ROOT"/} — timpa? (y/N) " PROCEED >&2 || true
+  if [[ "${PROCEED:-n}" != "y" && "${PROCEED:-n}" != "Y" ]]; then
+    echo "    Dilewati — test tidak diubah."
+    exit 0
+  fi
+fi
+
+# ── parse & kumpulkan metadata ─────────────────────────────────────────────
+NAMES=(); SLOTS=(); EVENTS=(); DANGER=(); ORDER=()
+name_index() {
+  local n="$1" i
+  for ((i = 0; i < ${#NAMES[@]}; i++)); do
+    [[ "${NAMES[$i]}" == "$n" ]] && echo "$i" && return 0
+  done
+  echo "-1"
+}
+
+CUR=""
+while IFS= read -r line; do
+  case "$line" in
+    C*)
+      CUR="${line#C}"
+      if is_all_upper "$CUR" || [[ "$EXT" == "tsx" && ! "$CUR" =~ ^[A-Z] ]]; then
+        CUR=""
+      fi
+      if [[ -n "$CUR" ]]; then
+        NAMES+=("$CUR"); SLOTS+=(""); EVENTS+=(""); DANGER+=(""); ORDER+=("$CUR")
+      fi
+      ;;
+    S*)
+      slot_line="${line#*$'\t'}"
+      [[ "$slot_line" =~ data-slot=\"([^\"]*)\" ]] || continue
+      idx="$(name_index "$CUR")"
+      (( idx >= 0 )) && SLOTS[$idx]="${SLOTS[$idx]}${BASH_REMATCH[1]} "
+      ;;
+    E*)
+      [[ -n "$CUR" ]] && { idx="$(name_index "$CUR")"; (( idx >= 0 )) && EVENTS[$idx]=1; }
+      ;;
+    P*)
+      [[ -n "$CUR" ]] || continue
+      sig="${line#*$'\t'}"
+      if grep -Eq '(^|[[:space:]])[[:space:]]*(data|columns|items|rows)(,|}|[[:space:]]|$)' <<<"$sig" \
+        || grep -Eq '\bon[A-Z][A-Za-z]*:[^=?]' <<<"$sig"; then
+        idx="$(name_index "$CUR")"
+        (( idx >= 0 )) && DANGER[$idx]=1
+      fi
+      ;;
+  esac
+done < <(parse_source "$SRC/$DIR/$FILE")
+
+if (( ${#NAMES[@]} == 0 )); then
+  printf '    %s✗ Tidak ada komponen/fungsi yang dikenali di %s%s\n' "$C_RED" "$FILE" "$C_RESET"
+  exit 1
+fi
+
+# ── kebutuhan import ───────────────────────────────────────────────────────
+NEED_HOOK=0; NEED_LIB=0; NEED_RENDER=0; NEED_USER=0; NEED_VI=0
+USED_NAMES=(); USED_DEFAULTS=(); USED_NAMED=()
+for name in "${ORDER[@]}"; do
+  idx="$(name_index "$name")"
+  if [[ "$name" == use* && "$EXT" == "ts" ]]; then
+    NEED_HOOK=1; USED_NAMES+=("$name")
+  elif [[ "$EXT" == "ts" ]]; then
+    NEED_LIB=1; USED_NAMES+=("$name")
+  elif [[ "${DANGER[$idx]}" == "1" || "$name" == *Content || "$name" == *Panel ]]; then
+    continue
+  else
+    NEED_RENDER=1; USED_NAMES+=("$name")
+    [[ "${EVENTS[$idx]}" == "1" ]] && { NEED_USER=1; NEED_VI=1; }
+  fi
+done
+
+if (( ${#USED_NAMES[@]} > 0 )); then
+  for name in "${USED_NAMES[@]}"; do
+    if grep -qE "^[[:space:]]*export[[:space:]]+default[[:space:]]+(function|const)[[:space:]]+$name([(<:]|$)" "$SRC/$DIR/$FILE"; then
+      USED_DEFAULTS+=("$name")
+    else
+      USED_NAMED+=("$name")
+    fi
+  done
+fi
+
+IMPORT_PATH="$(import_path "$DIR" "$BASE")"
+
+IMPORT_LINE=""
+if (( ${#USED_DEFAULTS[@]} > 0 || ${#USED_NAMED[@]} > 0 )); then
+  IMPORT_LINE="import "
+  (( ${#USED_DEFAULTS[@]} > 0 )) && IMPORT_LINE+="${USED_DEFAULTS[0]}"
+  if (( ${#USED_NAMED[@]} > 0 )); then
+    (( ${#USED_DEFAULTS[@]} > 0 )) && IMPORT_LINE+=", "
+    USED_JOINED="$(IFS=", "; echo "${USED_NAMED[*]}")"
+    IMPORT_LINE+="{ $USED_JOINED }"
+  fi
+  IMPORT_LINE+=" from \"$IMPORT_PATH\""
+fi
+
+CONTENT="// File uji otomatis dari \`pnpm unitest create\` — sesuaikan sesuai kebutuhan."
+CONTENT+=$'\n'
+CONTENT+=$'\n'
+if (( NEED_RENDER )); then
+  CONTENT+="import { render } from \"@testing-library/react\""$'\n'
+  (( NEED_USER )) && CONTENT+="import { userEvent } from \"@testing-library/user-event\""$'\n'
+  (( NEED_VI )) && CONTENT+="import { vi } from \"vitest\""$'\n'
+fi
+(( NEED_HOOK )) && CONTENT+="import { renderHook } from \"@testing-library/react\""$'\n'
+if (( NEED_RENDER || NEED_HOOK || NEED_LIB )); then
+  CONTENT+="import { describe, expect, it } from \"vitest\""$'\n'
+else
+  CONTENT+="import { describe, it } from \"vitest\""$'\n'
+fi
+CONTENT+=$'\n'
+[[ -n "$IMPORT_LINE" ]] && CONTENT+="$IMPORT_LINE"$'\n'
+
+part_depth() {
+  # kedalaman hierarki Base UI: Root=0, Item=1, part lain di dalam Item=2
+  case "$1" in
+    *Item) echo 1 ;;
+    *Trigger | *Content | *Panel | *Header | *Control | *Indicator | *Value | *Group | *Separator | *Title | *Description | *Close | *Icon | *Label | *Arrow) echo 2 ;;
+    *) echo 0 ;;
+  esac
+}
+
+wrap_of() {
+  # parent = komponen lain di file yang sama dengan kedalaman lebih dangkal (urutan deklarasi)
+  local target="$1" p open="" close="" d_t chain=()
+  d_t="$(part_depth "$target")"
+  (( d_t == 0 )) && { printf '|'; return 0; }
+  for p in "${ORDER[@]}"; do
+    [[ "$p" == "$target" ]] && break
+    (( $(part_depth "$p") < d_t )) && chain+=("$p")
+  done
+  if (( ${#chain[@]} > 0 )); then
+    for p in "${chain[@]}"; do open+="<$p>"; done
+    for ((i = ${#chain[@]} - 1; i >= 0; i--)); do close+="</${chain[$i]}>"; done
+  fi
+  printf '%s|%s' "$open" "$close"
+}
+
+for name in "${ORDER[@]}"; do
+  idx="$(name_index "$name")"
+  WRAP="$(wrap_of "$name")"
+  W_OPEN="${WRAP%%|*}"
+  W_CLOSE="${WRAP#*|}"
+  if [[ "$name" == use* && "$EXT" == "ts" ]]; then
+    CONTENT+=$'\n'"describe(\"$name()\", () => {"$'\n'
+    CONTENT+="  it(\"mengembalikan nilai boolean\", () => {"$'\n'
+    CONTENT+="    const { result } = renderHook(() => $name())"$'\n'
+    CONTENT+="    expect(typeof result.current).toBe(\"boolean\")"$'\n'
+    CONTENT+="  })"$'\n'
+    CONTENT+="})"$'\n'
+  elif [[ "$EXT" == "ts" ]]; then
+    CONTENT+=$'\n'"describe(\"$name()\", () => {"$'\n'
+    CONTENT+="  it(\"terdefinisi sebagai fungsi\", () => {"$'\n'
+    CONTENT+="    expect(typeof $name).toBe(\"function\")"$'\n'
+    CONTENT+="  })"$'\n'
+    CONTENT+="  it.todo(\"perilaku: $name\")"$'\n'
+    CONTENT+="})"$'\n'
+  elif [[ "$name" == *Content || "$name" == *Panel ]]; then
+    slot_cond="${SLOTS[$idx]%% *}"
+    CONTENT+=$'\n'"describe(\"$name\", () => {"$'\n'
+    CONTENT+="  it.todo(\"merender saat item/dialog terbuka\")"$'\n'
+    CONTENT+=$'\n'"  // Konten hanya dirender saat terbuka (default tertutup) — contoh:"$'\n'
+    CONTENT+="  // it(\"merender saat terbuka\", () => {"$'\n'
+    CONTENT+="  //   const { container } = render(${W_OPEN}<$name />${W_CLOSE})"$'\n'
+    CONTENT+="  //   expect(container.querySelector('[data-slot=\"$slot_cond\"]')).toBeInTheDocument()"$'\n'
+    CONTENT+="  // })"$'\n'
+    CONTENT+="})"$'\n'
+  elif [[ "${DANGER[$idx]}" == "1" ]]; then
+    CONTENT+=$'\n'"describe(\"$name\", () => {"$'\n'
+    CONTENT+="  it.todo(\"merender dengan props wajib\")"$'\n'
+    CONTENT+=$'\n'"  // Contoh (aktifkan setelah props wajib terpenuhi):"$'\n'
+    CONTENT+="  // it(\"merender tanpa error\", () => {"$'\n'
+    CONTENT+="  //   const { container } = render(<$name {...props} />)"$'\n'
+    CONTENT+="  //   expect(container.firstChild).not.toBeNull()"$'\n'
+    CONTENT+="  // })"$'\n'
+    CONTENT+="})"$'\n'
+  elif [[ -n "${SLOTS[$idx]%% *}" ]]; then
+    slot="${SLOTS[$idx]%% *}"
+    CONTENT+=$'\n'"describe(\"$name\", () => {"$'\n'
+    CONTENT+="  it(\"merender dengan data-slot: $slot\", () => {"$'\n'
+    CONTENT+="    const { container } = render(${W_OPEN}<$name />${W_CLOSE})"$'\n'
+    CONTENT+="    expect(container.querySelector('[data-slot=\"$slot\"]')).toBeInTheDocument()"$'\n'
+    CONTENT+="  })"$'\n'
+    CONTENT+=$'\n'"  it(\"menerapkan className tambahan\", () => {"$'\n'
+    CONTENT+="    const { container } = render(${W_OPEN}<$name className=\"mt-4\" />${W_CLOSE})"$'\n'
+    CONTENT+="    expect(container.querySelector('[data-slot=\"$slot\"]')).toHaveClass(\"mt-4\")"$'\n'
+    CONTENT+="  })"$'\n'
+    if [[ "${EVENTS[$idx]}" == "1" ]]; then
+      CONTENT+=$'\n'"  it(\"menangani event onClick\", async () => {"$'\n'
+      CONTENT+="    const user = userEvent.setup()"$'\n'
+      CONTENT+="    const onClick = vi.fn()"$'\n'
+      CONTENT+="    const { container } = render(${W_OPEN}<$name onClick={onClick} />${W_CLOSE})"$'\n'
+      CONTENT+="    await user.click(container.querySelector('[data-slot=\"$slot\"]') as HTMLElement)"$'\n'
+      CONTENT+="    expect(onClick).toHaveBeenCalledTimes(1)"$'\n'
+      CONTENT+="  })"$'\n'
+    fi
+    CONTENT+="})"$'\n'
+  else
+    CONTENT+=$'\n'"describe(\"$name\", () => {"$'\n'
+    CONTENT+="  it(\"merender tanpa error\", () => {"$'\n'
+    CONTENT+="    const { container } = render(${W_OPEN}<$name />${W_CLOSE})"$'\n'
+    CONTENT+="    expect(container.firstChild).not.toBeNull()"$'\n'
+    CONTENT+="  })"$'\n'
+    CONTENT+="})"$'\n'
+  fi
+done
+
+mkdir -p "$(dirname "$OUT")"
+printf '%s' "$CONTENT" >"$OUT"
+pnpm exec prettier --write "$OUT" >/dev/null 2>&1 || true
+
+printf '\n    %s✔ Test dibuat:%s %s\n' "$C_GREEN" "$C_RESET" "${OUT#"$ROOT"/}"
+printf '      import : %s\n' "$IMPORT_PATH"
+
+read -rp "Jalankan test-nya sekarang? (y/N) " RUN >&2 || true
+if [[ "${RUN:-n}" == "y" || "${RUN:-n}" == "Y" ]]; then
+  pnpm --filter @workspace/audit-vitest run test "${OUT#"$ROOT"/audit/vitest/}"
+fi

@@ -4,7 +4,7 @@ Monorepo ini punya **129 test otomatis** dalam 2 package audit terpisah di bawah
 
 | Package                     | Lingkungan              | Cakupan                       | Jumlah                               |
 | --------------------------- | ----------------------- | ----------------------------- | ------------------------------------ |
-| `@workspace/audit-vitest`   | jsdom + Testing Library | UI `@workspace/shadcn` + lib  | **92 test / 28 file**                |
+| `@workspace/audit-vitest`   | jsdom + Testing Library | UI `@workspace/shadcn` + lib  | **102 test / 32 file**                |
 | `@workspace/audit-security` | Node                    | Unit JWT + integrasi live API | **37 test** (21 unit + 16 integrasi) |
 
 ---
@@ -30,6 +30,24 @@ pnpm test:security      # hanya security
 
 Menu folder/file dibuat **dinamis** dari isi `<package>/src/` — folder tanpa file test di-skip, input bisa nomor atau nama folder, dan Enter = semua. Untuk security, peringatan API dev (`localhost:4000`) tetap muncul sebelum eksekusi.
 
+### ⚡ Generator test — `pnpm unitest create`
+
+Membuat skeleton unit test untuk komponen/fungsi `@workspace/shadcn`, disalin ke `audit/vitest/src/<folder-asal>/` (mencerminkan `packages/shadcn/src/`):
+
+```bash
+pnpm unitest create                    # menu pilih folder & file
+pnpm unitest create ui                 # pilih file di folder ui
+pnpm unitest create ui accordion.tsx   # buat test langsung
+```
+
+Yang dihasilkan otomatis:
+
+- **Import path** dari exports map package (`@workspace/shadcn/ui/button`, `…/hooks/use-mobile`, `…/components/data-table` via index, dsb.), termasuk default export.
+- **Satu `describe` per komponen** di file; test nyata: render + `data-slot` + `className` tambahan (+ `onClick` bila di-destructure). Bagian Base UI yang butuh induk (`AccordionItem`, `AccordionTrigger`, …) otomatis dibungkus parent-nya.
+- **Hook** → `renderHook`; **lib** → `typeof` + `it.todo`.
+- Fallback `it.todo` untuk komponen ber-props-wajib (terdeteksi `data|columns|items|rows` atau `on*:` tanpa default) dan bagian render-kondisional (`*Content`/`*Panel`).
+- File test sudah ada → prompt timpa; selesai → prettier + tawaran menjalankan test.
+
 # Watch mode (per package)
 
 pnpm --filter @workspace/audit-vitest test:watch
@@ -45,31 +63,31 @@ pnpm --filter @workspace/audit-vitest exec vitest run src/ui/button.test.tsx
 
 ---
 
-## 🧪 `audit-vitest` — Test UI (92 test)
+## 🧪 `audit-vitest` — Test UI (102 test)
 
 Menguji komponen `@workspace/shadcn` di **jsdom** dengan **Vitest + Testing Library** (react, jest-dom, user-event).
 
 ### Struktur
 
 ```
-
+```
 audit/vitest/
-├── vitest.config.ts # environment: jsdom, setupFiles: ./setup.ts
-├── setup.ts # polyfill & matchers global
-└── src/
-├── lib/
-│ ├── api.test.ts # 8 test — apiFetch (header, token, error, fallback)
-│ └── utils.test.ts # 6 test — cn() (merge, konflik twMerge, dsb.)
-└── ui/ # 26 file — satu per komponen
-├── button.test.tsx # render, data-slot, onClick, disabled, varian
-├── dialog.test.tsx # buka/tutup, role, tombol close
-├── select.test.tsx # open, pilih opsi, defaultValue
-├── sidebar.test.tsx # provider, error tanpa provider, toggle
-├── theme-provider.test.tsx # hotkey D, double-press, tidak saat mengetik
-└── … (avatar, breadcrumb, calendar, checkbox, collapsible, dropdown-menu,
-field, input, input-group, label, navigation-menu, popover, scroll-area,
-separator, sheet, skeleton, table, tabs, textarea, tooltip)
-
+├── vitest.config.ts     # environment: jsdom, setupFiles: ./setup.ts
+├── setup.ts             # polyfill & matchers global
+└── src/                 # mencerminkan struktur packages/shadcn/src/
+    ├── lib/                       # api.test.ts (8) · utils.test.ts (6)
+    ├── ui/                        # 27 file — satu per komponen
+    │   ├── button.test.tsx        # render, data-slot, onClick, disabled, varian
+    │   ├── accordion.test.tsx     # hasil pnpm unitest create
+    │   └── … (avatar, breadcrumb, calendar, checkbox, collapsible, dialog,
+    │        dropdown-menu, field, input, input-group, label, navigation-menu,
+    │        popover, scroll-area, select, separator, sheet, sidebar, skeleton,
+    │        table, tabs, textarea, theme-provider, tooltip)
+    ├── hooks/
+    │   └── use-mobile.test.ts     # renderHook (hasil pnpm unitest create)
+    └── components/
+        ├── auth/login.test.tsx    # hasil pnpm unitest create (todo: butuh onLogin)
+        └── data-table/data-table.test.tsx  # hasil pnpm unitest create (todo: butuh data/columns)
 ````
 
 ### `setup.ts` — polyfill yang penting
