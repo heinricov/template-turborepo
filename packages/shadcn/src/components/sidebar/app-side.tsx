@@ -51,18 +51,19 @@ export function AppSidebar({
 }) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        {brand && <SidebarBrand {...brand} />}
-      </SidebarHeader>
+      <SidebarHeader>{brand && <SidebarBrand {...brand} />}</SidebarHeader>
       <SidebarContent>
         {menu?.NavMain?.items?.length ? (
           <NavMain title={menu.NavMain.title} items={menu.NavMain.items} />
         ) : null}
         {menu?.NavCollaps?.items?.length ? (
-          <NavCollaps title={menu.NavCollaps.title} items={menu.NavCollaps.items} />
+          <NavCollaps
+            title={menu.NavCollaps.title}
+            items={menu.NavCollaps.items}
+          />
         ) : null}
       </SidebarContent>
-      <SidebarFooter >
+      <SidebarFooter className="group-data-[collapsible=icon]:hidden">
         Version 1.0.0
       </SidebarFooter>
       <SidebarRail />

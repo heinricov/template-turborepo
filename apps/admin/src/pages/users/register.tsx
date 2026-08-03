@@ -1,10 +1,15 @@
 import { useCallback, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import DataForm, { type DataFormField } from "@workspace/shadcn/components/data-form"
+import DataForm, {
+  type DataFormField,
+} from "@workspace/shadcn/components/data-form"
 
 export default function UsersRegisterPage() {
   const navigate = useNavigate()
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [message, setMessage] = useState<{
+    type: "success" | "error"
+    text: string
+  } | null>(null)
 
   const fields: DataFormField[] = [
     {
